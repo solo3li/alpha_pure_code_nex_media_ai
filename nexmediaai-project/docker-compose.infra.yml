@@ -1,0 +1,68 @@
+version: '3.8'
+
+services:
+    postgres:
+        build:
+            context: .
+            dockerfile: ./docker/local/postgres/Dockerfile
+        ports:
+            - "5432:5432"
+        volumes:
+            - banker_local_db:/var/lib/postgresql/data
+            - ./backups:/backups
+        env_file:
+            - ./.env/.env.local
+        networks:
+            - banker_local_nw
+
+    mailpit:
+        image: docker.io/axllent/mailpit:v1.20.3
+        ports:
+            - "8025:8025"
+            - "1025:1025"
+        volumes:
+            - banker_mailpit_db:/data
+        environment:
+            MP_MAX_MESSAGES: 5000
+            MP_DATA_FILE: /data/mailpit.db
+            MP_SMTP_AUTH_ACCEPT_ANY: 1
+            MP_SMTP_AUTH_ALLOW_INSECURE: 1
+        networks:
+            - banker_local_nw
+   
+    redis:
+        image: redis:7.0-alpine3.19
+        ports:
+            - "6379:6379"
+        command:
+            [
+            "redis-server",
+            "--appendonly", "yes",
+            "--protected-mode", "no",
+            "--requirepass", "asfgbadfhybsdfxgvadrv"
+            ]
+        networks:
+            - banker_local_nw
+        environment:
+            - REDIS_PASSWORD=asfgbadfhybsdfxgvadrv
+
+    rabbitmq:
+        image: rabbitmq:3-management
+        ports:
+            - "5672:5672"
+            - "15672:15672"
+        volumes:
+            - rabbitmq_data:/var/lib/rabbitmq
+            - rabbitmq_log:/var/log/rabbitmq
+        networks:
+            - banker_local_nw
+
+networks:
+    banker_local_nw:
+        driver: bridge
+
+volumes:
+    banker_local_db:
+    banker_mailpit_db:
+    rabbitmq_data:
+    rabbitmq_log:

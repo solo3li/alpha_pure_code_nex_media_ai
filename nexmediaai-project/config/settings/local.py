@@ -15,7 +15,7 @@ if path.isfile(local_env_file):
 SECRET_KEY = getenv("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 SITE_NAME = getenv("SITE_NAME")
 

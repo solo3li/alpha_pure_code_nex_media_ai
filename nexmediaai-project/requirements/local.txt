@@ -1,6 +1,5 @@
 -r base.txt
 
 black==24.8.0
-watchfiles==0.22.0
 django-redis-admin
 phonenumbers
