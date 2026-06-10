@@ -34,7 +34,7 @@ ADMIN_EMAIL = getenv("ADMIN_EMAIL")
 EMAIL_USE_TLS = True  # Brevo uses TLS on port 587
 MAX_UPLOAD_SIZE = 1 * 1024 * 1024
 
-CSRF_TRUSTED_ORIGINS = ["http://localhost:8080", "https://nexmediaai.com","https://www.nexmediaai.com" ]
+CSRF_TRUSTED_ORIGINS = ["http://localhost:8000", "http://127.0.0.1:8000", "http://localhost:8080", "https://nexmediaai.com", "https://www.nexmediaai.com"]
 
 LOCKOUT_DURATION = timedelta(minutes=1)
 
