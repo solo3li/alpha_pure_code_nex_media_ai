@@ -1,0 +1,8 @@
+requests==2.32.3
+gunicorn==21.2.0
+ffmpeg-python==0.2.0
+deep-translator==1.11.4
+Flask
+openai>=1.0.0
+requests
+werkzeug

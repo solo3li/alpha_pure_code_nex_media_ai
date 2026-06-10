@@ -1,0 +1,601 @@
+{% load static %}
+{% load i18n %}
+{% get_current_language as CURRENT_LANG %}
+<!DOCTYPE html>
+<html lang="{{ CURRENT_LANG }}" dir="{% if CURRENT_LANG == 'ar' %}rtl{% else %}ltr{% endif %}">
+<head>
+  <!-- Google Tag Manager -->
+  <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+  new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+  'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+  })(window,document,'script','dataLayer','GTM-M3QMV7SP');</script>
+  <!-- End Google Tag Manager -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voice to Text Converter - NEX MEDIA AI</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css">
+    <link rel="stylesheet" href="/static/voice_to_text/style.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+  <!-- Language Switcher CSS -->
+  <link rel="stylesheet" href="{% static 'home/css/lang-switcher.css' %}">
+  {% if CURRENT_LANG == 'ar' %}
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&family=Tajawal:wght@300;400;500;700&display=swap">
+  {% endif %}
+</head>
+<body>
+  <!-- Google Tag Manager (noscript) -->
+  <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-M3QMV7SP"
+  height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+  <!-- End Google Tag Manager (noscript) -->
+  
+    <div class="background-overlay"></div>
+    
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-left">
+                <i class="fas fa-microphone nav-icon"></i>
+                <span class="nav-title">{% trans "Voice to Text Converter" %}</span>
+            </div>
+            
+            <div class="nav-right">
+        {% include "partials/language_switcher.html" %}
+                <div class="trial-info">
+                    <div class="trial-card">
+                        <span class="trial-label">{% trans "Minutes Left" %}</span>
+                        <span class="trial-value" id="trials-counter">{{ number_of_trials }} {% trans "Minutes" %}</span>
+                    </div>
+                </div>
+                
+                <button type="button" class="upgrade-btn" onclick="window.location.href='/#container-sub'">
+                    <i class="fas fa-bolt"></i>
+                    <span>{% trans "Upgrade" %}</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+    
+    <div class="main-content">
+        <div class="page-header">
+            <h1>{% trans "Voice to Text Converter" %}</h1>
+            <p>{% trans "Extract text from audio and video files with high accuracy using AI." %}</p>
+        </div>
+        
+        <div class="content-grid">
+            <div class="media-preview-section">
+                <div class="media-container">
+                    <div class="media-player-section">
+                        <h3>
+                            <i class="fas fa-play-circle"></i>
+                            {% trans "Uploaded Media" %}
+                        </h3>
+                        <audio id="audioPlayer" controls class="media-player" style="display: none;">
+                            {% trans "Your browser does not support the audio element." %}
+                        </audio>
+                    </div>
+                    
+                    <div class="text-output-section">
+                        <h3>
+                            <i class="fas fa-file-text"></i>
+                            {% trans "Generated Text" %}
+                        </h3>
+                        <div class="text-output-container">
+                            <div id="outputText" class="text-output">
+                                {% trans "Your transcribed text will appear here..." %}
+                            </div>
+                            <button class="copy-btn" onclick="copyToClipboard()" style="display: none;">
+                                <i class="fas fa-copy"></i>
+                                {% trans "Copy Text" %}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="upload-section">
+                <div class="upload-form">
+                    <div class="upload-area">
+                        <div class="upload-zone" onclick="document.getElementById('mediaInput').click()">
+                            <div class="upload-content">
+                                <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                                <h3>{% trans "Upload Audio/Video" %}</h3>
+                                <p>{% trans "Drag & drop your media file here or click to browse" %}</p>
+                                <div class="upload-btn">
+                                    <i class="fas fa-plus"></i>
+                                    {% trans "Choose File" %}
+                                </div>
+                            </div>
+                        </div>
+                        <input type="file" id="mediaInput" accept="audio/*,video/*" style="display: none;">
+                    </div>
+                    
+                    <!-- Translate Checkbox -->
+                    <div class="translate-option">
+                        <label class="checkbox-container">
+                            <input type="checkbox" id="translateCheckbox">
+                            <span class="checkmark"></span>
+                            <span class="checkbox-label">
+                                <i class="fas fa-language"></i>
+                                {% trans "Translate to another language" %}
+                            </span>
+                        </label>
+                    </div>
+                    
+                    <!-- Language Selection (initially disabled) -->
+                    <div class="language-selection" id="languageSelection" style="opacity: 0.6; pointer-events: none;">
+                        <label for="languageSelect">
+                            <i class="fas fa-language"></i>
+                            {% trans "Target Language" %}
+                        </label>
+                        <select id="languageSelect" class="language-select" disabled>
+                            <option value="ar">Arabic</option>
+                            <option value="hy">Armenian</option>
+                            <option value="az">Azerbaijani</option>
+                            <option value="eu">Basque</option>
+                            <option value="be">Belarusian</option>
+                            <option value="bn">Bengali</option>
+                            <option value="bs">Bosnian</option>
+                            <option value="bg">Bulgarian</option>
+                            <option value="ca">Catalan</option>
+                            <option value="ceb">Cebuano</option>
+                            <option value="ny">Chichewa</option>
+                            <option value="zh-cn">Chinese (Simplified)</option>
+                            <option value="zh-tw">Chinese (Traditional)</option>
+                            <option value="co">Corsican</option>
+                            <option value="hr">Croatian</option>
+                            <option value="cs">Czech</option>
+                            <option value="da">Danish</option>
+                            <option value="nl">Dutch</option>
+                            <option value="en" selected>English</option>
+                            <option value="eo">Esperanto</option>
+                            <option value="et">Estonian</option>
+                            <option value="tl">Filipino</option>
+                            <option value="fi">Finnish</option>
+                            <option value="fr">French</option>
+                            <option value="fy">Frisian</option>
+                            <option value="gl">Galician</option>
+                            <option value="ka">Georgian</option>
+                            <option value="de">German</option>
+                            <option value="el">Greek</option>
+                            <option value="gu">Gujarati</option>
+                            <option value="ht">Haitian Creole</option>
+                            <option value="ha">Hausa</option>
+                            <option value="haw">Hawaiian</option>
+                            <option value="he">Hebrew</option>
+                            <option value="hi">Hindi</option>
+                            <option value="hmn">Hmong</option>
+                            <option value="hu">Hungarian</option>
+                            <option value="is">Icelandic</option>
+                            <option value="ig">Igbo</option>
+                            <option value="id">Indonesian</option>
+                            <option value="ga">Irish</option>
+                            <option value="it">Italian</option>
+                            <option value="ja">Japanese</option>
+                            <option value="jw">Javanese</option>
+                            <option value="kn">Kannada</option>
+                            <option value="kk">Kazakh</option>
+                            <option value="km">Khmer</option>
+                            <option value="rw">Kinyarwanda</option>
+                            <option value="ko">Korean</option>
+                            <option value="ku">Kurdish (Kurmanji)</option>
+                            <option value="ky">Kyrgyz</option>
+                            <option value="lo">Lao</option>
+                            <option value="la">Latin</option>
+                            <option value="lv">Latvian</option>
+                            <option value="lt">Lithuanian</option>
+                            <option value="lb">Luxembourgish</option>
+                            <option value="mk">Macedonian</option>
+                            <option value="mg">Malagasy</option>
+                            <option value="ms">Malay</option>
+                            <option value="ml">Malayalam</option>
+                            <option value="mt">Maltese</option>
+                            <option value="mi">Maori</option>
+                            <option value="mr">Marathi</option>
+                            <option value="mn">Mongolian</option>
+                            <option value="my">Myanmar (Burmese)</option>
+                            <option value="ne">Nepali</option>
+                            <option value="no">Norwegian</option>
+                            <option value="or">Odia (Oriya)</option>
+                            <option value="ps">Pashto</option>
+                            <option value="fa">Persian</option>
+                            <option value="pl">Polish</option>
+                            <option value="pt">Portuguese</option>
+                            <option value="pa">Punjabi</option>
+                            <option value="ro">Romanian</option>
+                            <option value="ru">Russian</option>
+                            <option value="sm">Samoan</option>
+                            <option value="gd">Scots Gaelic</option>
+                            <option value="sr">Serbian</option>
+                            <option value="st">Sesotho</option>
+                            <option value="sn">Shona</option>
+                            <option value="sd">Sindhi</option>
+                            <option value="si">Sinhala</option>
+                            <option value="sk">Slovak</option>
+                            <option value="sl">Slovenian</option>
+                            <option value="so">Somali</option>
+                            <option value="es">Spanish</option>
+                            <option value="su">Sundanese</option>
+                            <option value="sw">Swahili</option>
+                            <option value="sv">Swedish</option>
+                           极 value="tg">Tajik</option>
+                            <option value="ta">Tamil</option>
+                            <option value="tt">Tatar</option>
+                            <option value="te">Telugu</option>
+                            <option value="th">Thai</option>
+                            <option value="tr">Turkish</option>
+                            <option value="tk">Turkmen</option>
+                            <option value="uk">Ukrainian</option>
+                            <option value="ur">Urdu</option>
+                            <option value="ug">Uyghur</option>
+                            <option value="uz">Uzbek</option>
+                            <option value="vi">Vietnamese</option>
+                            <option value="cy">Welsh</option>
+                            <option value="xh">Xhosa</option>
+                            <option value="yi">Yiddish</option>
+                            <option value="yo">Yoruba</option>
+                            <option value="zu">Zulu</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button id="generateButton" class="generate-btn" onclick="processMedia();" disabled>
+                        <i class="fas fa-magic"></i>
+                        {% trans "Generate Text" %}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Progress Container -->
+    <div class="progress-section" id="progress-container" style="display: none;">
+        <div class="status-message" id="status-message"></div>
+        <div class="progress-bar-wrapper">
+            <div class="progress-bar-fill" id="progress-bar" style="width: 0%">
+                <span class="progress-text">0%</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Trial Popup -->
+    <div id="trialPopup" class="popup-overlay" style="display: none;">
+        <div class="popup-content">
+            <div class="popup-header">
+                <h2>Free Trials Exhausted</h2>
+                <button class="popup-close">&times;</button>
+            </div>
+            <div class="popup-body">
+                <i class="fas fa-exclamation-triangle warning-icon"></i>
+                <p>You've used all your free trial attempts. Subscribe now to continue using this tool.</p>
+                <button id="subscribeButton" class="subscribe-btn" onclick="window.location.href='/#container-sub'">
+                    <i class="fas fa-crown"></i>
+                    Subscribe Now
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alert Popup -->
+    <div id="popupAlert" class="alert-popup"></div>
+
+    <script>
+        // DOM Elements
+        const mediaInput = document.getElementById('mediaInput');
+        const languageSelect = document.getElementById('languageSelect');
+        const generateButton = document.getElementById('generateButton');
+        const audioPlayer = document.getElementById('audioPlayer');
+        const outputText = document.getElementById('outputText');
+        const popupAlert = document.getElementById('popupAlert');
+        const progressContainer = document.getElementById('progress-container');
+        const progressBar = document.getElementById('progress-bar');
+        const statusMessage = document.getElementById('status-message');
+        const trialsCounter = document.getElementById('trials-counter');
+        const trialPopup = document.getElementById('trialPopup');
+        const translateCheckbox = document.getElementById('translateCheckbox');
+        const languageSelection = document.getElementById('languageSelection');
+
+        // Toggle language selector based on checkbox
+        translateCheckbox.addEventListener('change', function() {
+            if (this.checked) {
+                languageSelection.style.opacity = '1';
+                languageSelection.style.pointerEvents = 'all';
+                languageSelect.disabled = false;
+            } else {
+                languageSelection.style.opacity = '0.6';
+                languageSelection.style.pointerEvents = 'none';
+                languageSelect.disabled = true;
+            }
+        });
+
+        // Utility functions
+        function toggleGenerateButton(enabled) {
+            generateButton.disabled = !enabled;
+            if (enabled) {
+                generateButton.classList.add('enabled');
+            } else {
+                generateButton.classList.remove('enabled');
+            }
+        }
+
+        function setProgress(percent, message) {
+            progressBar.style.width = percent + '%';
+            progressBar.querySelector('.progress-text').textContent = Math.round(percent) + '%';
+            statusMessage.textContent = message;
+        }
+
+        function showPopup(message, type = 'info') {
+            popupAlert.textContent = message;
+            popupAlert.className = `alert-popup ${type} show`;
+            setTimeout(() => {
+                popupAlert.classList.remove('show');
+            }, 5000);
+        }
+
+        function checkMediaDuration(file) {
+            return new Promise((resolve, reject) => {
+                const media = new Audio(URL.createObjectURL(file));
+                media.onloadedmetadata = () => {
+                    resolve(media.duration);
+                    URL.revokeObjectURL(media.src);
+                };
+                media.onerror = () => {
+                    reject(new Error('Failed to load media file'));
+                    URL.revokeObjectURL(media.src);
+                };
+            });
+        }
+
+        function copyToClipboard() {
+            const text = outputText.textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                showPopup('Text copied to clipboard!', 'success');
+            }).catch(err => {
+                console.error('Failed to copy text: ', err);
+                showPopup('Failed to copy text', 'error');
+            });
+        }
+
+        // Main processing function
+        async function processMedia() {
+            const file = mediaInput.files[0];
+            const shouldTranslate = translateCheckbox.checked;
+            const targetLanguage = shouldTranslate ? languageSelect.value : '';
+
+            if (!file) {
+                showPopup('Please select a media file first.', 'error');
+                return;
+            }
+
+            // Disable the button during processing
+            toggleGenerateButton(false);
+            progressContainer.style.display = 'block';
+            setProgress(0, 'Starting processing...');
+
+            try {
+                // First check trials
+                const trialsResponse = await fetch('/voice-to-text/api/trials-left/');
+                const trialsData = await trialsResponse.json();
+                
+                if (trialsData.error) {
+                    throw new Error(trialsData.error);
+                }
+                
+                if (trialsData.trials_left <= 0) {
+                    $('#trialPopup').fadeIn();
+                    throw new Error('No trial time left');
+                }
+
+                // Check duration
+                const duration = await checkMediaDuration(file);
+                
+                if (duration > trialsData.max_input) {
+                    throw new Error(`The maximum allowed duration is ${trialsData.max_input} seconds. Please upload a shorter file.`);
+                }
+                
+                if (duration > trialsData.trials_left) {
+                    throw new Error(`The remaining allowed duration is ${trialsData.trials_left} seconds. Please upload a shorter file.`);
+                }
+
+                // Show the uploaded media
+                const mediaURL = URL.createObjectURL(file);
+                audioPlayer.src = mediaURL;
+                audioPlayer.style.display = 'block';
+
+                // Update progress
+                setProgress(20, 'Uploading file...');
+
+                // Send file to backend for processing
+                const formData = new FormData();
+                formData.append('audio', file);
+                formData.append('translate', shouldTranslate.toString()); // Add translate flag
+                if (shouldTranslate) {
+                    formData.append('target', targetLanguage); // Add target language if translating
+                }
+
+                setProgress(40, 'Processing audio with AI...');
+
+                const response = await fetch('/voice-to-text/process/', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    if (response.status === 403 && errorData.show === 'No-sub-no-Trial') {
+                        $('#trialPopup').fadeIn();
+                        throw new Error('No subscription or trial time left');
+                    }
+                    throw new Error(errorData.error || 'Processing failed');
+                }
+
+                const result = await response.json();
+
+                if (!result.success) {
+                    throw new Error(result.error || 'Processing failed');
+                }
+
+                // Update progress
+                setProgress(90, 'Finalizing...');
+
+                // Display the result
+                outputText.textContent = result.text;
+                document.querySelector('.copy-btn').style.display = 'block';
+
+                // Complete
+                setProgress(100, 'Processing complete!');
+                
+                // Update trials counter
+                await updateTrialCount();
+                
+                showPopup('Processing completed successfully!', 'success');
+
+            } catch (error) {
+                console.error('Error:', error);
+                if (error.message !== 'No trial time left' && error.message !== 'No subscription or trial time left') {
+                    showPopup(`Error: ${error.message}`, 'error');
+                }
+            } finally {
+                toggleGenerateButton(true);
+                setTimeout(() => {
+                    progressContainer.style.display = 'none';
+                }, 2000);
+            }
+        }
+
+        async function updateTrialCount() {
+            try {
+                const response = await fetch('/voice-to-text/api/trials-left/');
+                const data = await response.json();
+                
+                if (data.trials_left !== undefined) {
+                    const minutesLeft = Math.round(data.trials_left / 60 * 10) / 10;
+                    trialsCounter.textContent = minutesLeft + " Minutes";
+                    
+                    if (data.trials_left === 0) {
+                        $('#trialPopup').fadeIn();
+                    }
+                }
+            } catch (error) {
+                console.error('Failed to update trial count:', error);
+            }
+        }
+
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            // File input handling
+            mediaInput.addEventListener('change', function() {
+                const file = mediaInput.files[0];
+                if (!file) {
+                    toggleGenerateButton(false);
+                    audioPlayer.style.display = 'none';
+                    return;
+                }
+
+                // Enable the button while we check the duration
+                toggleGenerateButton(true);
+                
+                checkMediaDuration(file)
+                    .then(duration => {
+                        // Check if duration is within limits
+                        fetch('/voice-to-text/api/trials-left/')
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.trials_left !== undefined && data.max_input !== undefined) {
+                                    const maxInput = data.max_input;
+                                    const remaining = data.trials_left;
+
+                                    if (duration > maxInput) {
+                                        showPopup(`The maximum allowed duration is ${maxInput} seconds. Please upload a shorter file.`, 'error');
+                                        mediaInput.value = '';
+                                        toggleGenerateButton(false);
+                                        audioPlayer.style.display = 'none';
+                                    } else if (duration > remaining) {
+                                        showPopup(`The remaining allowed duration is ${remaining} seconds. Please upload a shorter file.`, 'error');
+                                        mediaInput.value = '';
+                                        toggleGenerateButton(false);
+                                        audioPlayer.style.display = 'none';
+                                    }
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error checking trials:', error);
+                                showPopup('Unable to verify file limits.', 'error');
+                                mediaInput.value = '';
+                                toggleGenerateButton(false);
+                                audioPlayer.style.display = 'none';
+                            });
+                    })
+                    .catch(error => {
+                        console.error('Error checking duration:', error);
+                        showPopup('Invalid media file. Please try again.', 'error');
+                        mediaInput.value = '';
+                        toggleGenerateButton(false);
+                        audioPlayer.style.display = 'none';
+                    });
+            });
+
+            // Close popup when clicking X
+            $(document).on('click', '.popup-close', function () {
+                $('#trialPopup').fadeOut();
+            });
+        });
+    </script>
+
+    <style>
+        /* Add styles for the checkbox */
+        .translate-option {
+            margin: 15px 0;
+        }
+
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            font-size: 14px;
+            color: #333;
+        }
+
+        .checkbox-container input[type="checkbox"] {
+            display: none;
+        }
+
+        .checkmark {
+            width: 20px;
+            height: 20px;
+            background: #fff;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+            margin-right: 10px;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .checkbox-container input[type="checkbox"]:checked + .checkmark {
+            background: #007bff;
+            border-color: #007bff;
+        }
+
+        .checkbox-container input[type="checkbox"]:checked + .checkmark:after {
+            content: '✓';
+            position: absolute;
+            color: white;
+            font-size: 14px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .checkbox-label {
+            font-weight: 500;
+        }
+
+        .language-selection {
+            transition: opacity 0.3s ease;
+        }
+    </style>
+
+  <script src="{% static 'home/js/lang-switcher.js' %}"></script>
+</body>
+</html>

@@ -1,0 +1,130 @@
+{% load static %}
+{% load i18n %}
+{% get_current_language as CURRENT_LANG %}
+<!DOCTYPE html>
+<html lang="{{ CURRENT_LANG }}" dir="{% if CURRENT_LANG == 'ar' %}rtl{% else %}ltr{% endif %}">
+<head>
+  <!-- Google Tag Manager -->
+  <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+  new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+  'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+  })(window,document,'script','dataLayer','GTM-M3QMV7SP');</script>
+  <!-- End Google Tag Manager -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ tool_name|title }} {% trans "History" %} - NEX MEDIA AI</title>
+    <link rel="stylesheet" href="{% static 'history/style-1.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css">
+    {% if CURRENT_LANG == 'ar' %}
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&family=Tajawal:wght@300;400;500;700&display=swap">
+    {% endif %}
+</head>
+<body>
+  <!-- Google Tag Manager (noscript) -->
+  <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-M3QMV7SP"
+  height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+  <!-- End Google Tag Manager (noscript) -->
+  
+    <div class="background-overlay"></div>
+    
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-left">
+                <i class="fas fa-plane nav-icon"></i>
+                <span class="nav-title">{{ tool_name|title }} {% trans "History" %}</span>
+            </div>
+            <button type="button" class="upgrade-btn" onclick="window.location.href='/#container-sub'">
+                <i class="fas fa-bolt"></i>
+                <span>{% trans "Upgrade" %}</span>
+            </button>
+        </div>
+    </nav>
+    
+    <div class="main-content">
+        <div class="page-header">
+            <h1>{% trans "Trip History" %}</h1>
+            <p>{% trans "Your previously planned trips and adventures" %}</p>
+        </div>
+        
+        <div class="trips-grid" id="history">
+            <!-- User's trip history will be populated here -->
+        </div>
+    </div>
+    
+    <script>
+        window.__HISTORY_TRANS = {
+            noTrips: "{% trans 'No Trips Found' %}",
+            noTripsDesc: "{% trans 'You have not planned any trips yet. Start exploring the world!' %}",
+            viewDetails: "{% trans 'View Details' %}"
+        };
+        const toolName = "{{ tool_name }}";
+
+        document.addEventListener("DOMContentLoaded", function() {
+            fetch(`{% url 'history:get_make_my_trip_history' %}`)
+                .then(response => response.json())
+                .then(data => {
+                    let historyDiv = document.getElementById('history');
+                    
+                    if (data.length === 0) {
+                        historyDiv.innerHTML = `
+                            <div class="empty-state">
+                                <div class="empty-icon">
+                                    <i class="fas fa-plane"></i>
+                                </div>
+                                <h3>${window.__HISTORY_TRANS.noTrips}</h3>
+                                <p>${window.__HISTORY_TRANS.noTripsDesc}</p>
+                            </div>
+                        `;
+                        return;
+                    }
+                    
+                    data.forEach(item => {
+                        let div = document.createElement('div');
+                        div.classList.add('trip-card');
+
+                        let imageContainer = document.createElement('div');
+                        imageContainer.classList.add('trip-image');
+                        
+                        let img = document.createElement('img');
+                        img.src = item.thumbnail;
+                        img.alt = item.trip_name;
+                        img.loading = 'lazy';
+
+                        imageContainer.appendChild(img);
+
+                        let contentContainer = document.createElement('div');
+                        contentContainer.classList.add('trip-content');
+
+                        let tripName = document.createElement('h3');
+                        tripName.classList.add('trip-title');
+                        tripName.textContent = item.trip_name;
+
+                        let tripDate = document.createElement('p');
+                        tripDate.classList.add('trip-date');
+                        tripDate.innerHTML = `
+                            <i class="fas fa-calendar"></i>
+                            ${item.trip_date}
+                        `;
+
+                        contentContainer.appendChild(tripName);
+                        contentContainer.appendChild(tripDate);
+
+                        let viewButton = document.createElement('a');
+                        viewButton.href = `{% url 'history:view_trip' 0 %}`.replace('0', item.id);
+                        viewButton.innerHTML = `
+                            <i class="fas fa-eye"></i>
+                            <span>${window.__HISTORY_TRANS.viewDetails}</span>
+                        `;
+                        viewButton.classList.add('view-btn');
+
+                        div.appendChild(imageContainer);
+                        div.appendChild(contentContainer);
+                        div.appendChild(viewButton);
+                        historyDiv.appendChild(div);
+                    });
+                });
+        });
+    </script>
+</body>
+</html>

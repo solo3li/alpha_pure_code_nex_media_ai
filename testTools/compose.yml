@@ -1,0 +1,75 @@
+version: "3.9"
+
+services:
+
+  # project_text_to_cartoon:
+  #   build:
+  #     context: ./Project-text to-cartoon
+  #     dockerfile: Dockerfile
+  #   container_name: project_text_to_cartoon
+  #   ports:
+  #     - "5004:5004"
+  #   volumes:
+  #     - ./Project-text to-cartoon:/app
+  #   restart: always
+  #   deploy:
+  #     resources:
+  #       reservations:
+  #         devices:
+  #           - driver: nvidia
+  #             count: all
+  #             capabilities: [ gpu ]
+
+  # v_bg_remover:
+  #   build:
+  #     context: ./v-bg-remover
+  #     dockerfile: Dockerfile
+  #   container_name: v_bg_remover
+  #   ports:
+  #     - "5550:5550"
+  #   volumes:
+  #     - ./v-bg-remover:/app
+  #   restart: always
+  #   deploy:
+  #     resources:
+  #       reservations:
+  #         devices:
+  #           - driver: nvidia
+  #             count: all
+  #             capabilities: [ gpu ]
+
+  video_caption:
+    build:
+      context: ./video-caption
+      dockerfile: Dockerfile
+    container_name: video_caption
+    ports:
+      - "5005:5004"
+    restart: always
+    volumes:
+      - ./video-caption:/app
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [ gpu ]
+
+  # voice_to_text:
+  #   build:
+  #     context: ./voice-to-text
+  #     dockerfile: Dockerfile
+  #   container_name: voice_to_text
+  #   ports:
+  #     - "5006:5004"
+  #   volumes:
+  #     - ./voice-to-text:/app
+  #   restart: always
+  #   deploy:
+  #     resources:
+  #       reservations:
+  #         devices:
+  #           - driver: nvidia
+  #             count: all
+  #             capabilities: [ gpu ]

@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Google Tag Manager -->
+  <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+  new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+  'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+  })(window,document,'script','dataLayer','GTM-M3QMV7SP');</script>
+  <!-- End Google Tag Manager -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Travel Plan</title>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBsu2xsHBKMJBJUrBvXQLBlIxf92DG9ZSc&libraries=places"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f9f9f9;
+        }
+    
+        header {
+            background-color: #1A1A1D; /* Primary color */
+            color: white;
+            text-align: center;
+            padding: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+    
+        .container {
+            display: flex;
+            height: 100vh
+        }
+    
+        .places-container {
+            width: 30%;
+            overflow-y: auto;
+            background: #1A1A1D;
+            padding: 20px;
+            box-shadow: 2px 0 6px rgba(0, 0, 0, 0.1);
+        }
+    
+        .map-container {
+            width: 70%;
+            height: 100%;
+        }
+    
+        .day {
+            border: 1px solid #ddd;
+            margin-bottom: 10px;
+            border-radius: 6px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+    
+        .day-header {
+            background: #3B1C32; /* Header background color */
+            color: white;
+            height: 30px;
+            padding: 10px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+                font-size: 1.17em;
+        }
+    
+        .day-activities {
+            display: none;
+            padding: 10px;
+            background: #6A1E55;
+            max-height: 2000px; /* Initially collapsed */
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+    
+        .activity:hover {
+            transform: scale(1.02);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        }
+    
+        .day:hover {
+            transform: scale(1.02);
+            box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+        }
+        .unEx{
+            display: flex;
+            flex-direction: row;
+        }
+    
+        .activity {
+            display: flex;
+            color: white;
+            flex-direction: column;
+            cursor: pointer;
+            margin-bottom: 10px;
+            padding: 10px;
+            border: 1px solid #eee;
+            border-radius: 6px;
+            background: #A64D79;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+    
+        .activity:hover {
+            
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
+        }
+    
+        .activity img {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 8px;
+            transition: all 0.5s ease;
+            margin-bottom: 10px;
+        }
+    
+        .activity.expanded img {
+            width: 100%;
+            height: 150px;
+
+        }
+    
+        .activity.expanded .activity-details {
+            max-height: 200px;
+            padding: 10px;
+            flex-direction: column;
+        }
+        .activity.expanded .unEx .activity-info{
+            display: none;
+        }
+        .activity-info{
+            margin-left: 10px;
+        }
+    
+        .activity-details {
+            overflow: hidden;
+            max-height: 0;
+            background: #3B1C32;
+            border-radius: 6px;
+            margin-top: 10px;
+            border: 1px solid #ddd;
+            transition: all 0.5s ease;
+        }
+    
+        .marker {
+            background-color: #6A1E55; /* Marker color */
+            color: white;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .suggested-places {
+        margin-top: 15px;
+        padding: 10px;
+        background:#3B1C32;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+    }
+
+    .suggested-places h3 {
+        margin: 0 0 10px;
+        color: white;
+    }
+
+    .horizontal-cards {
+        display: flex;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        gap: 10px;
+        padding-bottom: 10px;
+    }
+
+    .horizontal-cards .activity {
+        flex: 0 0 300px;
+        display: flex;
+        flex-direction: column;
+        border: 1px solid #ccc;
+        margin-bottom: 10px;
+        border-radius: 6px;
+        background:#A64D79;
+        margin: 5px;
+        padding: 10px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .horizontal-cards .activity img {
+        width: 100%;
+        height: 150px;
+        object-fit: cover;
+        border-radius: 6px;
+    }
+
+    .horizontal-cards .activity-info h4 {
+        margin: 5px 0;
+    }
+
+    .horizontal-cards .activity-details {
+        display: none; /* Hide expanded details for suggested places */
+    }
+
+    @media (max-width: 768px) { /* Adjust max-width as needed for your target mobile size */
+    .map-container {
+    width: auto;
+    height: 50vh;
+}
+
+.places-container {
+    overflow-y: auto;
+    background: #1A1A1D;
+    padding: 20px;
+    height: 50vh;
+   
+    width: auto;
+    box-shadow: 2px 0 6px rgba(0, 0, 0, 0.1);
+}
+.container {
+    display: flex;
+    flex-direction: column-reverse;
+    height: 100vh;
+}
+}
+    </style>
+    
+</head>
+<body>
+  <!-- Google Tag Manager (noscript) -->
+  <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-M3QMV7SP"
+  height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+  <!-- End Google Tag Manager (noscript) -->
+ 
+    <div class="container">
+        <div id="trip-container" style="display: none;" data-trip-id="{{ trip_id }}"></div>
+        <div class="places-container" id="places-list"></div>
+        <div class="map-container" id="map"></div>
+    </div>
+
+    <script>
+        const tripContainer = document.getElementById('trip-container');
+        const tripId = tripContainer.getAttribute('data-trip-id'); 
+        fetch(`/history/api/make-my-trip/getmydata/${tripId}`, {
+    headers: { 'Accept': 'application/json' }
+})
+.then(response => {
+    if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    return response.json();
+})
+.then(responseData => {
+    // Parse the 'data' field which is a JSON string
+    const parsedData = JSON.parse(responseData.data);
+    // Pass only the parsed data to the render function
+    renderTravelPlan(parsedData);
+        })
+        .catch(error => {
+            console.error('Error fetching user info:', error);
+            document.getElementById('user-info').innerText = 'Failed to load user info.';
+        });
+
+let currentInfoWindow = null; // To track the currently open info window
+
+function createCustomMarker(latLng, name, color) {
+    const marker = new google.maps.Marker({
+        position: latLng,
+        map: map,
+        icon: {
+            path: google.maps.SymbolPath.BACKWARD_OPEN_ARROW,
+            scale: 12,
+            fillColor: color,
+            fillOpacity: 1,
+            strokeColor: '#ffffff',
+            strokeWeight: 2,
+        },
+        label: {
+            text: name[0],
+            color: 'white',
+        },
+    });
+    return marker;
+}
+
+function createInfoWindow(content) {
+    return new google.maps.InfoWindow({
+        content: content,
+    });
+}
+
+function addActivity(activity, container, index, showMarker = true) {
+    const activityDiv = document.createElement("div");
+    activityDiv.className = "activity";
+
+    const image = document.createElement("img");
+    if (activity.photos && activity.photos.length > 0 && activity.photos[0].photo_reference) {
+        image.src = activity.photos[0].photo_reference;
+    } else {
+        image.src = `https://www.google.com/images/branding/googlelogo/1x/googlelogo_light_color_272x92dp.png`;
+    }
+    image.alt = activity.name;
+
+    const info = document.createElement("div");
+    info.className = "activity-info";
+    info.innerHTML = `<h4>${activity.name}</h4><p>${activity.vicinity}</p>`;
+
+    // Info window content
+    const contentString = `
+        <div style="max-width: 300px;">
+            <img src="${image.src}" alt="${activity.name}" style="width: 100%; border-radius: 6px; margin-bottom: 10px;" />
+            <h3 style="margin: 0; font-size: 18px; font-weight: bold; color: #333;">${activity.name}</h3>
+            <p style="margin: 5px 0; font-size: 14px; color: #666;">${activity.vicinity}</p>
+            <a href="https://www.google.com/maps/search/?api=1&query=${activity.lat},${activity.lng}" 
+               target="_blank" 
+               style="display: inline-block; margin-top: 10px; padding: 10px 15px; background: #1A73E8; color: white; text-decoration: none; border-radius: 6px; font-size: 14px;">
+               View in Google Maps
+            </a>
+        </div>
+    `;
+
+    const infoWindow = createInfoWindow(contentString);
+    let marker = null;
+
+    if (showMarker) {
+        marker = createCustomMarker(
+            { lat: parseFloat(activity.lat), lng: parseFloat(activity.lng) },
+            activity.name,
+            colors[index % colors.length]
+        );
+        markers.push(marker);
+
+        // Add click event for the marker
+        marker.addListener("click", () => {
+            // Close the previously opened info window
+            if (currentInfoWindow) {
+                currentInfoWindow.close();
+            }
+
+            // Open the new info window
+            infoWindow.open(map, marker);
+            currentInfoWindow = infoWindow;
+        });
+    }
+
+    // Add click event for the activity in the list
+    activityDiv.addEventListener("click", () => {
+        map.panTo({ lat: parseFloat(activity.lat), lng: parseFloat(activity.lng) });
+
+        // Close the previously opened info window
+        if (currentInfoWindow) {
+            currentInfoWindow.close();
+        }
+
+        // Open the info window
+        if (showMarker) {
+            infoWindow.open(map, marker);
+        } else {
+            infoWindow.setPosition({ lat: parseFloat(activity.lat), lng: parseFloat(activity.lng) });
+            infoWindow.open(map);
+        }
+
+        currentInfoWindow = infoWindow;
+    });
+
+    activityDiv.appendChild(image);
+    activityDiv.appendChild(info);
+    container.appendChild(activityDiv);
+}
+
+        const map = new google.maps.Map(document.getElementById("map"), {
+            center: { lat: 31.2056765, lng: 29.9469988 },
+            zoom: 12
+        });
+
+        const placesList = document.getElementById("places-list");
+        const markers = [];
+
+        const colors = ["#FF5733", "#33FF57", "#3357FF", "#FFC733", "#8E44AD", "#2ECC71", "#C0392B", "#F39C12", "#1ABC9C"];
+
+ // Color codes for each day
+        let currentlyExpandedActivity = null; // Track currently expanded activity
+
+
+        function renderTravelPlan(travelPlan) {
+    Object.keys(travelPlan).forEach((day, index) => {
+        const dayDiv = document.createElement("div");
+        dayDiv.className = "day";
+
+        const dayHeader = document.createElement("div");
+        dayHeader.className = "day-header";
+        dayHeader.textContent = day;
+
+        const dayActivities = document.createElement("div");
+        dayActivities.className = "day-activities";
+
+        const suggestedPlaces = document.createElement("div");
+        suggestedPlaces.className = "suggested-places";
+        suggestedPlaces.innerHTML = `<h3>Suggested Places</h3><div class="horizontal-cards"></div>`;
+        const cardsContainer = suggestedPlaces.querySelector(".horizontal-cards");
+
+        travelPlan[day].forEach(activity => {
+            if (activity.priority === "suggested") {
+                // Add suggested places to the horizontal cards
+                addActivity(activity, cardsContainer, index, false);
+            } else {
+                // Handle main activities with inline implementation
+                const activityDiv = document.createElement("div");
+                activityDiv.className = "activity";
+
+                const image = document.createElement("img");
+                if (activity.photos && activity.photos.length > 0 && activity.photos[0].photo_reference) {
+                    image.src = activity.photos[0].photo_reference;
+                } else {
+                    image.src = `https://www.google.com/images/branding/googlelogo/1x/googlelogo_light_color_272x92dp.png`;
+                }
+                image.alt = activity.name;
+
+                const info = document.createElement("div");
+                info.className = "activity-info";
+                info.innerHTML = `<h4>${activity.name}</h4><p>${activity.vicinity}</p>`;
+
+                const activityDetails = document.createElement("div");
+                activityDetails.className = "activity-details";
+                activityDetails.innerHTML = `
+                    <p><strong>Rating:</strong> ${activity.rating}</p>
+                    <p><strong>Type:</strong> ${activity.type}</p>
+                    <p><strong>Description:</strong> ${activity.vicinity}</p>
+                `;
+                const unEx = document.createElement("div");
+                unEx.className = "unEx";
+                unEx.appendChild(image);
+                unEx.appendChild(info);
+                activityDiv.appendChild(unEx);
+                 
+
+                const contentString = `
+                    <div style="max-width: 300px;">
+                        <img src="${image.src}" alt="${activity.name}" style="width: 100%; border-radius: 6px; margin-bottom: 10px;" />
+                        <h3 style="margin: 0; font-size: 18px; font-weight: bold; color: #333;">${activity.name}</h3>
+                        <p style="margin: 5px 0; font-size: 14px; color: #666;">${activity.vicinity}</p>
+                        <a href="https://www.google.com/maps/search/?api=1&query=${activity.lat},${activity.lng}" 
+                           target="_blank" 
+                           style="display: inline-block; margin-top: 10px; padding: 10px 15px; background: #1A73E8; color: white; text-decoration: none; border-radius: 6px; font-size: 14px;">
+                           View in Google Maps
+                        </a>
+                    </div>
+                `;
+
+                const infoWindow = createInfoWindow(contentString);
+                const marker = createCustomMarker(
+                    { lat: parseFloat(activity.lat), lng: parseFloat(activity.lng) },
+                    activity.name,
+                    colors[index % colors.length]
+                );
+                markers.push(marker);
+
+                // Add click events for both the marker and activity
+                marker.addListener("click", () => {
+                    if (currentInfoWindow) {
+                        currentInfoWindow.close();
+                    }
+                    infoWindow.open(map, marker);
+                    currentInfoWindow = infoWindow;
+                });
+
+                activityDiv.addEventListener("click", () => {
+                    map.panTo({ lat: parseFloat(activity.lat), lng: parseFloat(activity.lng) });
+
+                    if (currentInfoWindow) {
+                        currentInfoWindow.close();
+                    }
+                    infoWindow.open(map, marker);
+                    currentInfoWindow = infoWindow;
+                });
+                activityDiv.addEventListener("click", () => {
+                    if (currentlyExpandedActivity && currentlyExpandedActivity !== activityDiv) {
+                        currentlyExpandedActivity.classList.remove("expanded");
+                        currentlyExpandedActivity.querySelector('.activity-details').style.maxHeight = "0";
+                    }
+
+                    activityDiv.classList.toggle("expanded");
+                    const isExpanded = activityDiv.classList.contains("expanded");
+                    activityDetails.style.maxHeight = isExpanded ? "200px" : "0";
+                    map.panTo({ lat: parseFloat(activity.lat), lng: parseFloat(activity.lng) });
+
+                    if (isExpanded) {
+                        currentlyExpandedActivity = activityDiv;
+                    } else {
+                        currentlyExpandedActivity = null;
+                    }
+                });
+
+
+        
+                activityDiv.appendChild(activityDetails);
+                dayActivities.appendChild(activityDiv);
+            }
+        });
+
+        dayHeader.addEventListener("click", () => {
+            const isOpen = dayActivities.style.display === "block";
+            dayActivities.appendChild(suggestedPlaces);
+            if (isOpen) {
+                dayActivities.style.maxHeight = "0";
+                setTimeout(() => {
+                    dayActivities.style.display = "none";
+                }, 300);
+            } else {
+                dayActivities.style.display = "block";
+                dayActivities.style.maxHeight = dayActivities.scrollHeight + 200 + "px";
+            }
+        });
+
+        dayDiv.appendChild(dayHeader);
+        dayDiv.appendChild(dayActivities);
+        placesList.appendChild(dayDiv);
+    });
+}
+
+        
+    </script>
+</body>
+</html>

@@ -1,0 +1,34 @@
+{% extends "admin/index.html" %}
+{% load i18n %}
+
+{% block content %}
+  <div class="dashboard-module">
+    <h2>Total Payments</h2>
+    <p><strong>${{ total_payments }}</strong></p>
+  </div>
+
+  <div class="dashboard-module">
+    <h2>Active Subscriptions</h2>
+    <p><strong>{{ active_subscriptions }}</strong></p>
+  </div>
+
+  <div class="dashboard-module">
+    <h2>Recent Payments</h2>
+    <ul>
+      {% for payment in recent_payments %}
+        <li>{{ payment.user.email }} - {{ payment.amount }} {{ payment.currency }} on {{ payment.created_at|date:"Y-m-d H:i" }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+
+  <div class="dashboard-module">
+    <h2>Latest Users</h2>
+    <ul>
+      {% for user in latest_users %}
+        <li>{{ user.email }} - joined at {{ user.created_at|date:"Y-m-d H:i" }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+
+  {{ block.super }}
+{% endblock %}

@@ -1,0 +1,67 @@
+/* Custom styles for Payment inline in User admin */
+.vTextField {
+    width: auto !important;
+}
+/* Target the payment inline table */
+#payment_set-group .tabular td.field-payment_id input,
+#payment_set-group .tabular td.field-payment_id {
+    width: 120px !important;
+    max-width: 120px !important;
+}
+
+#payment_set-group .tabular td.field-amount input,
+#payment_set-group .tabular td.field-amount {
+    width: 80px !important;
+    max-width: 80px !important;
+}
+
+#payment_set-group .tabular td.field-currency select,
+#payment_set-group .tabular td.field-currency {
+    width: 70px !important;
+    max-width: 70px !important;
+}
+
+#payment_set-group .tabular td.field-method select,
+#payment_set-group .tabular td.field-method {
+    width: 110px !important;
+    max-width: 110px !important;
+}
+
+#payment_set-group .tabular td.field-status select,
+#payment_set-group .tabular td.field-status {
+    width: 90px !important;
+    max-width: 90px !important;
+}
+
+#payment_set-group .tabular td.field-plan select,
+#payment_set-group .tabular td.field-plan {
+    width: 140px !important;
+    max-width: 140px !important;
+}
+
+#payment_set-group .tabular td.field-created_at,
+#payment_set-group .tabular td.field-created_at p {
+    width: 130px !important;
+    max-width: 130px !important;
+    font-size: 11px;
+}
+
+/* Make inputs fit their containers better */
+#payment_set-group .tabular input[type="text"],
+#payment_set-group .tabular input[type="number"],
+#payment_set-group .tabular select {
+    width: 100% !important;
+    box-sizing: border-box;
+}
+
+/* Improve overall table spacing */
+#payment_set-group .tabular thead th,
+#payment_set-group .tabular tbody td {
+    padding: 8px 5px;
+    vertical-align: middle;
+}
+
+/* Make the table more compact */
+#payment_set-group .tabular {
+    font-size: 12px;
+}

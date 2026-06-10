@@ -1,0 +1,18 @@
+{% extends 'auth/base_auth.html' %}
+
+{% block title %}Invalid Email Confirmation{% endblock %}
+
+{% block content %}
+<div class="auth-header">
+    <i class="fas fa-exclamation-triangle error-icon"></i>
+    <h1>Link Expired or Invalid</h1>
+    <p>{{ error }}</p>
+</div>
+
+<div class="text-center mt-4">
+    <a href="{% url 'account_login' %}" class="btn btn-primary">Back to Login</a>
+</div>
+
+<p>If you're having issues, <a href="{% url 'account_email' %}">resend confirmation email</a>.</p>
+
+{% endblock %}

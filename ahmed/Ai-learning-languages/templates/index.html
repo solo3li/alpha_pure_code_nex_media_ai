@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>AI Spanish Teacher</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <div class="container">
+    <!-- اختيار المستوى -->
+    <div id="level-selection" class="level-selection">
+      <h2>Choose Your Spanish Level</h2>
+      <div class="levels-grid">
+        <button class="level-btn" data-level="A1">A1<br><small>Beginner</small></button>
+        <button class="level-btn" data-level="A2">A2<br><small>Elementary</small></button>
+        <button class="level-btn" data-level="B1">B1<br><small>Intermediate</small></button>
+        <button class="level-btn" data-level="B2">B2<br><small>Upper Intermediate</small></button>
+        <button class="level-btn" data-level="C1">C1<br><small>Advanced</small></button>
+        <button class="level-btn" data-level="C2">C2<br><small>Proficient</small></button>
+      </div>
+    </div>
+
+    <!-- الواجهة الرئيسية (مخفية في البداية) -->
+    <div id="main-interface" class="main-interface hidden">
+      <!-- الكورة المركزية -->
+      <div id="status-circle" class="status-circle white"></div>
+      
+      <!-- معلومات المستوى -->
+      <div id="level-info" class="level-info">
+        <span id="current-level">A1</span>
+        <button id="change-level-btn" class="change-level-btn">Change Level</button>
+      </div>
+      
+      <!-- زرار المكالمة -->
+      <button id="call-btn" class="call-button">Start Call</button>
+    </div>
+    
+    <!-- منطقة المحادثة (مخفية في البداية) -->
+    <div id="chat-box" class="chat-box hidden"></div>
+  </div>
+
+  <script src="/static/script.js"></script>
+</body>
+</html>

@@ -1,0 +1,44 @@
+# name: Deploy Docker Compose App
+
+# on:
+#   push:
+#     branches:
+#       - main
+
+# jobs:
+#   deploy:
+#     runs-on: ubuntu-latest
+    
+#     steps:
+#       # Step 1: Setup SSH
+#       - name: Setup SSH
+#         run: |
+#           mkdir -p ~/.ssh
+#           cat << 'EOF' > ~/.ssh/id_ed25519
+#           ${{ secrets.SSH_PRIVATE_KEY }}
+#           EOF
+#           chmod 600 ~/.ssh/id_ed25519
+#           ssh-keyscan -H 93.127.202.235 >> ~/.ssh/known_hosts
+      
+#       # Step 2: SSH and Deploy
+#       - name: Pull Latest Code & Deploy 
+#         run: |
+#           ssh -i ~/.ssh/id_ed25519 root@93.127.202.235 << 'ENDSSH'
+#             cd /home/alpha/nexmediaai-project || exit 1
+
+#             echo "Pulling latest code..."
+#             git reset --hard
+#             git clean -fd
+#             git pull origin main
+
+#             echo "Building and starting Docker Compose..."
+#             docker compose -f local.yml up --build -d api --remove-orphans
+
+#             echo "Restarting NGINX..."
+#             systemctl restart nginx
+
+#             echo "Removing unused Docker images..."
+#             docker image prune -af
+
+#             echo "Deployment finished successfully."
+#           ENDSSH

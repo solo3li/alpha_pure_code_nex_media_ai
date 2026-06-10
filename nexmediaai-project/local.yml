@@ -1,0 +1,403 @@
+services:
+    api: &api
+        build:
+            context: .
+            dockerfile: ./docker/local/django/Dockerfile
+
+        volumes:
+            - .:/app:z
+            - ./staticfiles:/app/staticfiles
+            - ./media:/app/media  # Map media directory for shared access
+
+        expose:
+            - "8000"
+
+        env_file:
+            - ./.env/.env.local
+
+        depends_on:
+            - postgres
+            # - mailpit
+            # - redis
+            # - rabbitmq
+
+        command: /start.sh
+
+        networks:
+            - banker_local_nw
+        environment:
+            - FLASK_VIDEO_BG_REMOVER_URL=http://video_bg_remover:5001
+
+
+
+
+    postgres:
+        build:
+            context: .
+            dockerfile: ./docker/local/postgres/Dockerfile
+        ports:
+            - "5432:5432"
+        volumes:
+            - banker_local_db:/var/lib/postgresql/data
+            - ./backups:/backups
+        env_file:
+            - ./.env/.env.local
+        networks:
+            - banker_local_nw
+
+    mailpit:
+        image: docker.io/axllent/mailpit:v1.20.3
+        ports:
+            - "8025:8025"
+            - "1025:1025"
+        volumes:
+            - banker_mailpit_db:/data
+        environment:
+            MP_MAX_MESSAGES: 5000
+            MP_DATA_FILE: /data/mailpit.db
+            MP_SMTP_AUTH_ACCEPT_ANY: 1
+            MP_SMTP_AUTH_ALLOW_INSECURE: 1
+        networks:
+            - banker_local_nw
+   
+    redis:
+        image: redis:7.0-alpine3.19
+
+        command:
+            [
+            "redis-server",
+            "--appendonly", "yes",
+            "--protected-mode", "no",
+            "--requirepass", "asfgbadfhybsdfxgvadrv",
+            "--rename-command", "REPLICAOF", ""
+            ]
+
+        networks:
+            - banker_local_nw
+
+        environment:
+            - REDIS_PASSWORD=asfgbadfhybsdfxgvadrv
+
+
+
+    rabbitmq:
+        image: rabbitmq:3-management
+        ports:
+            - "5672:5672"
+            - "15672:15672"
+        volumes:
+            - rabbitmq_data:/var/lib/rabbitmq
+            - rabbitmq_log:/var/log/rabbitmq
+        networks:
+            - banker_local_nw
+
+    celeryworker:
+        <<: *api
+        command: /start-celeryworker.sh
+
+    flower:
+        <<: *api
+        ports:
+            - "5555:5555"
+        volumes:
+            - flower_db:/app/flower_db
+        command: /start-flower.sh
+
+    celerybeat:
+        build:
+            context: .
+            dockerfile: ./docker/local/django/Dockerfile
+        command: /start-celerybeat.sh
+        env_file:
+            - ./.env/.env.local
+        depends_on:
+            - redis
+            - postgres
+            - rabbitmq
+        networks:
+            - banker_local_nw
+
+    nginx:
+        build:
+            context: ./docker/local/nginx
+            dockerfile: Dockerfile
+        restart: always
+        ports:
+            - "8080:80"
+        volumes:
+            - ./staticfiles:/app/staticfiles
+            - ./media:/app/media  # Map media directory for shared access
+            - logs_store:/var/log/nginx
+            - ./demos:/app/demos:ro  # Voice demo MP3s for /voice-demos/ route
+        depends_on:
+            - api
+        networks:
+            - banker_local_nw
+
+    redisinsight:
+        image: redis/redisinsight:latest
+        ports:
+            - "5540:5540"
+        volumes:
+            - redisinsight_data:/data
+        environment:
+            - RI_APP_HOST=0.0.0.0
+        networks:
+            - banker_local_nw
+        depends_on:
+            - redis
+ 
+
+    # redis-commander:
+    #     image: rediscommander/redis-commander:latest
+    #     ports:
+    #         - "8081:8081"
+    #     environment:
+    #         - REDIS_HOSTS=local:redis:6379
+    #     networks:
+    #         - banker_local_nw
+    #     depends_on:
+    #         - redis
+    bg_remover:
+        build:
+            context: .
+            dockerfile: ./docker/local/flask/bg-remover/Dockerfile
+        volumes:
+            - ./services/bg_remover:/app:z
+            - ./media/history/bg_remover:/tmp/processed   
+            - bg_remover_uploads:/tmp/uploads
+        env_file:
+            - ./.env/.env.local
+        expose:
+            - "5000"
+        networks:
+            - banker_local_nw
+        environment:
+            - FLASK_ENV=production
+    
+    gpt:
+        build:
+            context: .
+            dockerfile: ./docker/local/flask/GPT/Dockerfile
+        container_name: gpt-flask-api
+        volumes:
+            - ./services/GPT:/app:z
+            - bg_remover_uploads:/tmp/uploads
+        env_file:
+            - ./.env/.env.local
+        expose:
+            - "5007"
+        networks:
+            - banker_local_nw
+        environment:
+            - FLASK_ENV=production
+        command: [
+            "gunicorn",
+            "--bind", "0.0.0.0:5007",
+            "--workers", "4",
+            "--timeout", "1000",
+            "--access-logfile", "-",
+            "app:app"
+                ]
+            
+    # video_bg_remover:
+    #     build:
+    #         context: .
+    #         dockerfile: ./docker/local/flask/video_bg_remover/Dockerfile
+    #     volumes:
+    #         - ./services/video_bg_remover:/app:z
+    #         - ./media:/app/media
+    #         - ./media/history/video_bg_remover:/tmp/processed
+    #         - bg_remover_uploads:/tmp/uploads
+    #     env_file:
+    #         - ./.env/.env.local
+    #     expose:
+    #         - "5001"
+    #     ports:
+    #         - "5001:5001"  # For debugging
+    #     networks:
+    #         - banker_local_nw
+    #     environment:
+    #         - FLASK_ENV=production
+    #         - FLASK_RUN_HOST=0.0.0.0  # Important!
+    #         - FLASK_RUN_PORT=5001
+    #         - FLASK_APP=app.py
+    #         - API_KEY=GPukTcc2FXcAo32U6j6y5rOK8LJW5QAf
+    #     command: ["flask", "run", "--host=0.0.0.0"]  # Explicit command
+    #     restart: always
+  
+    img_to_txt:
+        build:
+            context: .
+            dockerfile: ./docker/local/flask/img_to_txt/Dockerfile
+        volumes:
+            - ./services/img_to_txt:/app:z
+            - ./media:/app/media
+            - ./media/history/img_to_txt:/tmp/processed
+            - bg_remover_uploads:/app/uploads
+        env_file:
+            - ./.env/.env.local
+        expose:
+            - "5004"
+        ports:
+            - "5004:5004"  # For debugging
+        networks:
+            - banker_local_nw
+        environment:
+            - FLASK_ENV=production
+            - FLASK_RUN_HOST=0.0.0.0
+            - FLASK_RUN_PORT=5004
+            - FLASK_APP=app.py
+            - API_KEY=GPukTcc2FXcAo32U6j6y5rOK8LJW5QAf
+            - UPLOAD_FOLDER=/app/uploads
+        command: ["flask", "run", "--host=0.0.0.0"]
+        restart: always
+    
+    # video_caption:
+    #     build:
+    #         context: .
+    #         dockerfile: ./docker/local/flask/video_caption/Dockerfile
+    #     volumes:
+    #         - ./services/video_caption:/app:z
+    #         - ./media:/app/media
+    #         - ./media/history/video_bg_remover:/tmp/processed
+    #         - bg_remover_uploads:/tmp/uploads
+    #     env_file:
+    #         - ./.env/.env.local
+    #     expose:
+    #         - "5003"
+    #     ports:
+    #         - "5003:5003" 
+    #     networks:
+    #         - banker_local_nw
+    #     environment:
+    #         - FLASK_ENV=production
+    #         - FLASK_RUN_HOST=0.0.0.0  # Important!
+    #         - FLASK_RUN_PORT=5003
+    #         - FLASK_APP=app.py
+    #         - API_KEY=GPukTcc2FXcAo32U6j6y5rOK8LJW5QAf
+    #     command: ["flask", "run", "--host=0.0.0.0"]  # Explicit command
+    #     restart: always
+
+    voice_to_text:
+        build:
+            context: .
+            dockerfile: ./docker/local/flask/voice_to_text/Dockerfile
+        volumes:
+        - ./services/voice_to_text:/app
+        - bg_remover_uploads:/app/uploads
+        - voice_to_text_cache:/app/model_cache
+        env_file:
+        - ./.env/.env.local
+        expose:
+        - "5005"
+        networks:
+        - banker_local_nw
+        environment:
+        - API_KEY=GPukTcc2FXcAo32U6j6y5rOK8LJW5QAf  # Match your Django config
+        - FLASK_ENV=production
+
+    text_to_voice:
+        build:
+            context: .
+            dockerfile: ./docker/local/flask/text_to_voice/Dockerfile
+        container_name: text-to-voice-api
+        expose:
+        - "5008"
+        environment:
+        - PORT=5008
+        volumes:
+        - text-to-voice-data:/app/audio_files
+        networks:
+        - banker_local_nw
+
+    # text_to_cartoon:
+    #     build:
+    #         context: .
+    #         dockerfile: ./docker/local/flask/text_to_cartoon/Dockerfile
+    #     volumes:
+    #         - ./services/text_to_cartoon:/app:z
+    #         - ./media:/app/media
+    #         - ./media/history/text_to_cartoon:/tmp/processed
+    #         - bg_remover_uploads:/tmp/uploads
+    #     env_file:
+    #         - ./.env/.env.local
+    #     expose:
+    #         - "5006"
+
+    #     networks:
+    #         - banker_local_nw
+    #     environment:
+    #         - FLASK_ENV=production
+    #         - API_KEY=GPukTcc2FXcAo32U6j6y5rOK8LJW5QAf
+    #     command: [
+    #         "gunicorn",
+    #         "--bind", "0.0.0.0:5006",
+    #         "--workers", "4",
+    #         "--timeout", "1000",
+    #         "--access-logfile", "-",
+    #         "app:app"
+    #             ]
+
+    #     restart: always
+
+    make_my_trip:
+        build:
+            context: .
+            dockerfile: ./docker/local/flask/make_my_trip/Dockerfile
+        volumes:
+            - ./services/make_my_trip:/app:z
+            - ./media:/app/media
+        env_file:
+            - ./.env/.env.local
+        expose:
+            - "5010"
+
+        networks:
+            - banker_local_nw
+        command: [
+            "gunicorn",
+            "--bind", "0.0.0.0:5010",
+            "--workers", "4",
+            "--timeout", "1000",
+            "--access-logfile", "-",
+            "app:app"
+                ]
+
+        restart: always
+
+    orchestrator:
+        build:
+            context: .
+            dockerfile: ./docker/local/flask/orchestrator/Dockerfile
+        container_name: vm-orchestrator
+        volumes:
+            - ./services/orchestrator:/app:z
+        env_file:
+            - ./.env/.env.local
+        ports:
+            - "5550:5550"  # Changed from expose to ports for external access
+        networks:
+            - banker_local_nw
+        environment:
+            - FLASK_ENV=production
+            - REDIS_URL=redis://redis:6379/0
+        depends_on:
+            - redis
+        restart: unless-stopped
+
+networks:
+    banker_local_nw:
+        external: true
+
+volumes:
+    banker_local_db:
+    banker_mailpit_db:
+    logs_store:
+    rabbitmq_data:
+    rabbitmq_log:
+    redisinsight_data:
+    flower_db:
+    bg_remover_uploads:
+    voice_to_text_cache:
+    text-to-voice-data:

@@ -1,0 +1,362 @@
+
+
+{
+    "monthly_plans": [
+        {
+            "id": 3,
+            "name": "ProPlus",
+            "duration_days": 30,
+            "price_usd": "19.99",
+            "price_egp": "859.00",
+            "tools": [
+                {
+                    "tool_name": "GPT 4o",
+                    "max_trials": 14000,
+                    "unit": "Words"
+                },
+                {
+                    "tool_name": "GPT 3.5",
+                    "max_trials": 30000,
+                    "unit": "Words"
+                },
+                {
+                    "tool_name": "Image Background remover",
+                    "max_trials": 100,
+                    "unit": "photo"
+                },
+                {
+                    "tool_name": "Image to text",
+                    "max_trials": 200,
+                    "unit": "image"
+                },
+                {
+                    "tool_name": "Make my trip with AI",
+                    "max_trials": 20,
+                    "unit": "Trip"
+                },
+                {
+                    "tool_name": "Voice Generator",
+                    "max_trials": 20000,
+                    "unit": "character"
+                },
+                {
+                    "tool_name": "Video caption Generator",
+                    "max_trials": 7200,
+                    "unit": "minutes"
+                },
+                {
+                    "tool_name": "Voice to text",
+                    "max_trials": 14400,
+                    "unit": "minutes"
+                },
+                {
+                    "tool_name": "Text to Cartoon",
+                    "max_trials": 40,
+                    "unit": "prompt"
+                },
+                {
+                    "tool_name": "Video Background remover",
+                    "max_trials": 500,
+                    "unit": "seconds"
+                }
+            ]
+        },
+        {
+            "id": 2,
+            "name": "Pro",
+            "duration_days": 30,
+            "price_usd": "14.99",
+            "price_egp": "649.00",
+            "tools": [
+                {
+                    "tool_name": "GPT 4o",
+                    "max_trials": 7000,
+                    "unit": "Words"
+                },
+                {
+                    "tool_name": "GPT 3.5",
+                    "max_trials": 20000,
+                    "unit": "Words"
+                },
+                {
+                    "tool_name": "Image Background remover",
+                    "max_trials": 50,
+                    "unit": "photo"
+                },
+                {
+                    "tool_name": "Image to text",
+                    "max_trials": 100,
+                    "unit": "image"
+                },
+                {
+                    "tool_name": "Make my trip with AI",
+                    "max_trials": 10,
+                    "unit": "Trip"
+                },
+                {
+                    "tool_name": "Voice Generator",
+                    "max_trials": 15000,
+                    "unit": "character"
+                },
+                {
+                    "tool_name": "Video caption Generator",
+                    "max_trials": 5400,
+                    "unit": "minutes"
+                },
+                {
+                    "tool_name": "Voice to text",
+                    "max_trials": 10800,
+                    "unit": "minutes"
+                },
+                {
+                    "tool_name": "Text to Cartoon",
+                    "max_trials": 20,
+                    "unit": "prompt"
+                },
+                {
+                    "tool_name": "Video Background remover",
+                    "max_trials": 300,
+                    "unit": "seconds"
+                }
+            ]
+        },
+        {
+            "id": 8,
+            "name": "Text to voice",
+            "duration_days": 30,
+            "price_usd": "6.00",
+            "price_egp": "280.00",
+            "tools": [
+                {
+                    "tool_name": "Image Background remover",
+                    "max_trials": 0,
+                    "unit": "photo"
+                },
+                {
+                    "tool_name": "Make my trip with AI",
+                    "max_trials": 0,
+                    "unit": "Trip"
+                },
+                {
+                    "tool_name": "Voice Generator",
+                    "max_trials": 50000,
+                    "unit": "character"
+                },
+                {
+                    "tool_name": "Video caption Generator",
+                    "max_trials": 0,
+                    "unit": "minutes"
+                },
+                {
+                    "tool_name": "Voice to text",
+                    "max_trials": 0,
+                    "unit": "minutes"
+                },
+                {
+                    "tool_name": "Text to Cartoon",
+                    "max_trials": 0,
+                    "unit": "prompt"
+                },
+                {
+                    "tool_name": "Video Background remover",
+                    "max_trials": 0,
+                    "unit": "seconds"
+                },
+                {
+                    "tool_name": "GPT 3.5",
+                    "max_trials": 0,
+                    "unit": "Words"
+                },
+                {
+                    "tool_name": "GPT 4o",
+                    "max_trials": 0,
+                    "unit": "Words"
+                },
+                {
+                    "tool_name": "Image to text",
+                    "max_trials": 0,
+                    "unit": "image"
+                }
+            ]
+        }
+    ],
+    "yearly_plans": [
+        {
+            "id": 4,
+            "name": "Basic Annual",
+            "duration_days": 365,
+            "price_usd": "119.99",
+            "price_egp": "5199.00",
+            "tools": [
+                {
+                    "tool_name": "GPT 4o",
+                    "max_trials": 84000,
+                    "unit": "Words"
+                },
+                {
+                    "tool_name": "GPT 3.5",
+                    "max_trials": 240000,
+                    "unit": "Words"
+                },
+                {
+                    "tool_name": "Image Background remover",
+                    "max_trials": 600,
+                    "unit": "photo"
+                },
+                {
+                    "tool_name": "Image to text",
+                    "max_trials": 1200,
+                    "unit": "image"
+                },
+                {
+                    "tool_name": "Make my trip with AI",
+                    "max_trials": 120,
+                    "unit": "Trip"
+                },
+                {
+                    "tool_name": "Voice Generator",
+                    "max_trials": 180000,
+                    "unit": "character"
+                },
+                {
+                    "tool_name": "Video caption Generator",
+                    "max_trials": 64800,
+                    "unit": "minutes"
+                },
+                {
+                    "tool_name": "Voice to text",
+                    "max_trials": 129600,
+                    "unit": "minutes"
+                },
+                {
+                    "tool_name": "Text to Cartoon",
+                    "max_trials": 240,
+                    "unit": "prompt"
+                },
+                {
+                    "tool_name": "Video Background remover",
+                    "max_trials": 3600,
+                    "unit": "seconds"
+                }
+            ]
+        },
+        {
+            "id": 5,
+            "name": "Pro Annual",
+            "duration_days": 365,
+            "price_usd": "149.99",
+            "price_egp": "6999.00",
+            "tools": [
+                {
+                    "tool_name": "GPT 4o",
+                    "max_trials": 168000,
+                    "unit": "Words"
+                },
+                {
+                    "tool_name": "GPT 3.5",
+                    "max_trials": 360000,
+                    "unit": "Words"
+                },
+                {
+                    "tool_name": "Image Background remover",
+                    "max_trials": 1200,
+                    "unit": "photo"
+                },
+                {
+                    "tool_name": "Image to text",
+                    "max_trials": 2400,
+                    "unit": "image"
+                },
+                {
+                    "tool_name": "Make my trip with AI",
+                    "max_trials": 240,
+                    "unit": "Trip"
+                },
+                {
+                    "tool_name": "Voice Generator",
+                    "max_trials": 240000,
+                    "unit": "character"
+                },
+                {
+                    "tool_name": "Video caption Generator",
+                    "max_trials": 86400,
+                    "unit": "minutes"
+                },
+                {
+                    "tool_name": "Voice to text",
+                    "max_trials": 172800,
+                    "unit": "minutes"
+                },
+                {
+                    "tool_name": "Text to Cartoon",
+                    "max_trials": 480,
+                    "unit": "prompt"
+                },
+                {
+                    "tool_name": "Video Background remover",
+                    "max_trials": 6000,
+                    "unit": "seconds"
+                },
+                {
+                    "tool_name": "Video caption Generator",
+                    "max_trials": 0,
+                    "unit": "minutes"
+                }
+            ]
+        },
+        {
+            "id": 10,
+            "name": "Text to voice Annual",
+            "duration_days": 365,
+            "price_usd": "20.00",
+            "price_egp": "2000.00",
+            "tools": [
+                {
+                    "tool_name": "Image Background remover",
+                    "max_trials": 0,
+                    "unit": "photo"
+                },
+                {
+                    "tool_name": "Make my trip with AI",
+                    "max_trials": 0,
+                    "unit": "Trip"
+                },
+                {
+                    "tool_name": "Voice to text",
+                    "max_trials": 0,
+                    "unit": "minutes"
+                },
+                {
+                    "tool_name": "Text to Cartoon",
+                    "max_trials": 0,
+                    "unit": "prompt"
+                },
+                {
+                    "tool_name": "Video Background remover",
+                    "max_trials": 0,
+                    "unit": "seconds"
+                },
+                {
+                    "tool_name": "GPT 3.5",
+                    "max_trials": 0,
+                    "unit": "Words"
+                },
+                {
+                    "tool_name": "GPT 4o",
+                    "max_trials": 0,
+                    "unit": "Words"
+                },
+                {
+                    "tool_name": "Image to text",
+                    "max_trials": 0,
+                    "unit": "image"
+                },
+                {
+                    "tool_name": "Voice Generator",
+                    "max_trials": 600000,
+                    "unit": "character"
+                }
+            ]
+        }
+    ]
+}

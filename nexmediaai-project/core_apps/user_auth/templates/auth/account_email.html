@@ -1,0 +1,39 @@
+{% extends "auth/base_auth.html" %}
+
+{% load i18n %}
+
+{% block title %}Manage Emails{% endblock %}
+
+{% block content %}
+<div class="auth-header">
+    <h1>Manage Your Email Addresses</h1>
+    <p class="text-muted">You can add, remove, or resend confirmation emails here.</p>
+</div>
+
+<form method="post" action="{% url 'account_email' %}">
+  {% csrf_token %}
+  {{ form.as_p }}
+
+  <div class="form-group">
+    <button class="btn btn-primary" type="submit" name="action_add">{% trans "Add Email" %}</button>
+  </div>
+
+  {% if emailaddress_list %}
+    <h3>{% trans "Existing Emails" %}</h3>
+    <ul class="list-group">
+      {% for emailaddress in emailaddress_list %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+          {{ emailaddress.email }} 
+          {% if emailaddress.verified %}
+            <span class="badge badge-success">{% trans "Verified" %}</span>
+          {% else %}
+            <span class="badge badge-warning">{% trans "Unverified" %}</span>
+            <button class="btn btn-sm btn-link" name="email" value="{{ emailaddress.email }}" type="submit" name="action_send">{% trans "Resend" %}</button>
+          {% endif %}
+          <button class="btn btn-sm btn-danger" name="email" value="{{ emailaddress.email }}" type="submit" name="action_remove">{% trans "Remove" %}</button>
+        </li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+</form>
+{% endblock %}

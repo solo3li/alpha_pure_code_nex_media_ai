@@ -1,0 +1,610 @@
+{% load static %}
+{% load i18n %}
+{% get_current_language as CURRENT_LANG %}
+<!DOCTYPE html>
+<html lang="{{ CURRENT_LANG }}" dir="{% if CURRENT_LANG == 'ar' %}rtl{% else %}ltr{% endif %}">
+
+<head>
+    <!-- Google Tag Manager -->
+    <script>(function (w, d, s, l, i) {
+            w[l] = w[l] || []; w[l].push({
+                'gtm.start':
+                    new Date().getTime(), event: 'gtm.js'
+            }); var f = d.getElementsByTagName(s)[0],
+                j = d.createElement(s), dl = l != 'dataLayer' ? '&l=' + l : ''; j.async = true; j.src =
+                    'https://www.googletagmanager.com/gtm.js?id=' + i + dl; f.parentNode.insertBefore(j, f);
+        })(window, document, 'script', 'dataLayer', 'GTM-M3QMV7SP');</script>
+    <!-- End Google Tag Manager -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generate Itinerary URL</title>
+    <script
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBsu2xsHBKMJBJUrBvXQLBlIxf92DG9ZSc&libraries=places"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <style>
+        #loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            color: white;
+            font-size: 1.5rem;
+        }
+
+        .loader {
+            width: 48px;
+            height: 48px;
+            border: 5px solid #FFF;
+            border-bottom-color: transparent;
+            border-radius: 50%;
+            display: inline-block;
+            animation: rotation 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes rotation {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* General Styles */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-image: url("/static/make_my_trip/img/seko.jpg");
+            color: #EEEEEE;
+            height: 100vh;
+            font-weight: 500;
+        }
+
+        h1 {
+            text-align: center;
+            color: #D4BEE4;
+        }
+
+        form {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 16px;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 20px;
+            max-width: 400px;
+            width: 90%;
+        }
+
+        label {
+            font-size: 1rem;
+            color: #EEEE;
+        }
+
+
+
+
+        input[type="number"],
+
+        input[type="text"],
+        select {
+            width: calc(100% - 20px);
+            margin: 10px auto;
+            padding: 10px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 8px;
+            outline: none;
+            background-color: #D4BEE4;
+            color: #3B1C32;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            text-align: center;
+            display: block;
+            font-weight: 600;
+        }
+
+        /* Slider Styles */
+        /* Slider Styles */
+        .slider-container {
+            position: relative;
+            width: calc(100% - 20px);
+            margin: 10px auto;
+            text-align: center;
+        }
+
+        #priceSlider {
+            width: 100%;
+            appearance: none;
+            background: #A64D79;
+            height: 8px;
+            border-radius: 5px;
+            outline: none;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        #priceSlider::-webkit-slider-thumb {
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: #A64D79;
+            border-radius: 50%;
+            border: 2px solid #d1d1d1;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        #priceSlider::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        #priceSlider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            background: #A64D79;
+            border-radius: 50%;
+            border: 2px solid #6A1E55;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        #priceSlider::-moz-range-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        .slider-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 5px;
+            font-size: 0.9rem;
+            color: #EEEEEE;
+        }
+
+        .popup {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .popup-content {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            position: relative;
+            width: 300px;
+        }
+
+        .popup-close {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            cursor: pointer;
+            font-size: 20px;
+            color: black;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            font-size: 1.1rem;
+            border: none;
+            border-radius: 8px;
+            background-color: #9B7EBD;
+            color: #EEEEEE;
+            cursor: pointer;
+            transition: background 0.3s;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-weight: 600;
+
+        }
+
+        button:hover {
+            background-color: #3B1E54;
+
+
+        }
+
+        #generatedURL {
+            margin-top: 20px;
+            font-size: 1rem;
+            word-break: break-word;
+        }
+
+        /* Toggle Buttons for Checkboxes */
+        .toggle-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 10px 0 20px 0;
+        }
+
+        .toggle {
+            display: flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 16px;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 10px 20px;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.2s;
+        }
+
+        .toggleChecked {
+            display: flex;
+            align-items: center;
+            background: rgba(255, 0, 0, 0.2);
+            border-radius: 16px;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 10px 20px;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.2s;
+            transform: scale(1.05);
+        }
+
+        .toggle input {
+            display: none;
+        }
+
+        .toggle span {
+
+            color: #EEEEEE;
+        }
+
+        .container {
+
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+
+        }
+
+        .side-upper {
+
+
+            display: flex;
+            /* Use flexbox for alignment */
+            justify-content: flex-end;
+            /* Center child horizontally */
+            /* Center child vertically */
+            padding: 20px;
+            /* Add space inside the container */
+
+            /* Subtle border for the container */
+            /* Rounded corners */
+            /* Subtle shadow */
+            /* Limit the width */
+            margin: 20px auto;
+            width: 90vw;
+            /* Center the container on the page */
+        }
+
+        .trial {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 16px;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            padding: 10px 20px;
+
+
+
+            display: flex;
+            flex-direction: column;
+            /* Keep the box compact */
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            /* Subtle shadow */
+            font-family: Arial, sans-serif;
+            /* Font styling */
+            font-size: 16px;
+            /* Font size */
+            color: white;
+            /* Text color */
+            text-align: center;
+            /* Center text inside */
+        }
+
+        .trial span:first-child {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-weight: bold;
+            /* Highlight 'Free Trials' */
+            margin-right: 10px;
+            /* Space between text */
+        }
+
+        .trial span:last-child {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: white;
+            /* Match number color with the border */
+            font-weight: bold;
+            /* Make the number bold */
+        }
+
+
+        #trialPopup h2,
+        #trialPopup p {
+            color: #3B1E54;
+        }
+    </style>
+
+    <!-- Language Switcher CSS -->
+    <link rel="stylesheet" href="{% static 'home/css/lang-switcher.css' %}">
+    {% if CURRENT_LANG == 'ar' %}
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&family=Tajawal:wght@300;400;500;700&display=swap">
+    {% endif %}
+</head>
+
+<body>
+    <!-- Google Tag Manager (noscript) -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-M3QMV7SP" height="0" width="0"
+            style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager (noscript) -->
+
+    <div style="position: absolute; top: 15px; left: 15px; z-index: 1000;" class="lang-nav-holder">
+        {% include "partials/language_switcher.html" %}
+    </div>
+
+    <div class="side-upper">
+        <div class="trial">
+            <span>Free Trials</span>
+            <span>{{ number_of_trials }}</span>
+        </div>
+    </div>
+
+    <div class="container">
+        <form id="itineraryForm">
+            <h1>AI Itinerary Planner</h1>
+            <!-- Location Input -->
+            <label for="location">Choose Location:</label>
+            <input type="text" id="location" placeholder="Enter a city" required>
+            <input type="hidden" id="lat">
+            <input type="hidden" id="lng">
+
+            <!-- Number of Days -->
+            <label for="days">Number of Days:</label>
+            <input type="number" id="days" name="day" min="1" value="1" required>
+
+            <!-- Activities per Day -->
+            <label for="activities">Activities per Day:</label>
+            <input type="number" id="activities" name="act" min="1" value="3" required>
+
+            <!-- Price Level -->
+            <label for="price">Price Level:</label>
+            <div class="slider-container">
+                <input type="range" id="priceSlider" min="1" max="3" value="2" step="1">
+                <div class="slider-labels">
+                    <span>$</span>
+                    <span>$$</span>
+                    <span>$$$</span>
+                </div>
+            </div>
+
+            <!-- Categories -->
+            <label>Select Categories:</label>
+            <div class="toggle-container">
+                <label class="toggle">
+                    <input type="checkbox" id="category1" value="0">
+                    <span>Historical</span>
+                </label>
+                <label class="toggle">
+                    <input type="checkbox" id="category2" value="1">
+                    <span>Mall</span>
+                </label>
+                <label class="toggle">
+                    <input type="checkbox" id="category3" value="2">
+                    <span>Museum</span>
+                </label>
+                <label class="toggle">
+                    <input type="checkbox" id="category4" value="3">
+                    <span>Art Gallery</span>
+                </label>
+                <label class="toggle">
+                    <input type="checkbox" id="category5" value="4">
+                    <span>Amusement Park</span>
+                </label>
+                <label class="toggle">
+                    <input type="checkbox" id="category6" value="5">
+                    <span>Park</span>
+                </label>
+                <label class="toggle">
+                    <input type="checkbox" id="category7" value="6">
+                    <span>Natural Feature</span>
+                </label>
+            </div>
+
+            <button type="button" id="generateURL">Generate URL</button>
+            <p id="generatedURL"></p>
+        </form>
+    </div>
+
+    <script>
+        // Toggle checkbox styling
+        document.querySelectorAll('.toggle input').forEach(input => {
+            input.addEventListener('change', function () {
+                const parent = this.closest('.toggle');
+                if (this.checked) {
+                    parent.classList.add('toggleChecked');
+                } else {
+                    parent.classList.remove('toggleChecked');
+                }
+            });
+        });
+
+        // Google Maps Autocomplete
+        let autocomplete;
+        function initAutocomplete() {
+            const input = document.getElementById('location');
+            autocomplete = new google.maps.places.Autocomplete(input);
+            autocomplete.addListener('place_changed', () => {
+                const place = autocomplete.getPlace();
+                if (place.geometry) {
+                    document.getElementById('lat').value = place.geometry.location.lat();
+                    document.getElementById('lng').value = place.geometry.location.lng();
+                }
+            });
+        }
+
+        // Initialize autocomplete when the page loads
+        document.addEventListener("DOMContentLoaded", initAutocomplete);
+
+        // Attach event listener to the generate button
+        document.addEventListener("DOMContentLoaded", () => {
+            document.getElementById("generateURL").addEventListener("click", () => {
+                updateTrialCount();
+            });
+        });
+
+        // Update trial count and proceed if trials are available
+        function updateTrialCount() {
+            $.ajax({
+                url: '/make-my-trip/get_trials_left',
+                type: 'GET',
+                success: function (data) {
+                    if (data.trials_left !== undefined) {
+                        $('.trial span:last').text(data.trials_left);
+                        if (data.trials_left === 0) {
+                            $('#trialPopup').fadeIn(); // Show trial popup if no trials left
+                            return;
+                        }
+                        proceedWithGeneratingURL(); // Proceed if trials are available
+                    } else {
+                        showErrorPopup('Error: Invalid response for trials left');
+                    }
+                },
+                error: function () {
+                    showErrorPopup('Failed to fetch the updated trial count');
+                }
+            });
+        }
+
+        // Generate URL and handle the response
+        function proceedWithGeneratingURL() {
+            const loading = document.getElementById('loading');
+            loading.style.display = 'flex'; // Show loading screen
+
+            // Get all parameters
+            const params = {
+                day: document.getElementById("days").value,
+                act: document.getElementById("activities").value,
+                lat: document.getElementById("lat").value,
+                lng: document.getElementById("lng").value,
+                price: document.getElementById("priceSlider").value,
+                place: encodeURIComponent(document.getElementById("location").value),
+                your_array: Array.from(document.querySelectorAll("input[type='checkbox']"))
+                    .map(checkbox => checkbox.checked ? 1 : 0)
+                    .join('&your_array=')
+            };
+
+            // Build query string
+            const query = new URLSearchParams(params).toString();
+
+            // Make AJAX call
+            fetch(`/make-my-trip/getUserInfo?${query}`, {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+                .then(response => {
+                    if (!response.ok) throw response; // Throw the response for error handling
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.status === 'success') {
+                        // Redirect to the results page with the token
+                        window.location.href = `/make-my-trip/results?token=${data.token}`;
+                    } else if (data.status === 'error') {
+                        // Show error popup with the message from the backend
+                        showErrorPopup(data.message);
+                    }
+                })
+                .catch(async (error) => {
+                    if (error.json) {
+                        const errorData = await error.json();
+                        showErrorPopup(errorData.message || 'An unexpected error occurred.');
+                    } else {
+                        showErrorPopup('Failed to generate itinerary. Please try again.');
+                    }
+                })
+                .finally(() => {
+                    loading.style.display = 'none'; // Hide loading screen
+                });
+        }
+
+        // Show error popup
+        function showErrorPopup(message) {
+            const errorPopup = document.getElementById('errorPopup');
+            errorPopup.style.display = 'flex';
+        }
+
+        // Close error popup
+        function closeErrorPopup() {
+            const errorPopup = document.getElementById('errorPopup');
+            errorPopup.style.display = 'none';
+        }
+
+        // Close trial popup
+        $(document).on('click', '.popup-close', function () {
+            $('#trialPopup').fadeOut();
+        });
+    </script>
+    <!-- Error Popup -->
+    <div id="errorPopup" class="popup" style="display: none; color: black;">
+        <div class="popup-content">
+            <span class="popup-close" onclick="closeErrorPopup()">&times;</span>
+            <h2>No places here you can choose another place or add more categouries</h2>
+
+        </div>
+    </div>
+
+
+
+    <!-- Trial Popup (existing) -->
+
+    <div id="trialPopup" class="popup" style="display: none;">
+        <div class="popup-content">
+            <span class="popup-close">&times;</span>
+            <h2>Your Free Trials Are Over</h2>
+            <p>You’ve used all your free trial attempts. Subscribe now to continue using this tool.</p>
+            <button id="subscribeButton">Subscribe</button>
+        </div>
+    </div>
+    <!-- Loading Screen -->
+    <div id="loading" style="display: none;">
+        <div class="loader"></div>
+        <p>Generating Your Travel Plan...</p>
+    </div>
+
+    <!-- Language Switcher JS -->
+    <script src="{% static 'home/js/lang-switcher.js' %}"></script>
+</body>
+
+</html>

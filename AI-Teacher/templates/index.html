@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>AI Spanish Teacher</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <div class="container">
+    <!-- اختيار المستوى -->
+    <div id="level-selection" class="level-selection">
+      <h2>Choose Your Spanish Level</h2>
+      <div class="levels-grid">
+        <button class="level-btn" data-level="A1">A1<br><small>Beginner</small></button>
+        <button class="level-btn" data-level="A2">A2<br><small>Elementary</small></button>
+        <button class="level-btn" data-level="B1">B1<br><small>Intermediate</small></button>
+        <button class="level-btn" data-level="B2">B2<br><small>Upper Intermediate</small></button>
+        <button class="level-btn" data-level="C1">C1<br><small>Advanced</small></button>
+        <button class="level-btn" data-level="C2">C2<br><small>Proficient</small></button>
+      </div>
+    </div>
+
+    <!-- Chatbot Interface -->
+    <div id="main-interface" class="main-interface hidden">
+      <div class="chat-header">
+        <div id="status-circle" class="status-circle white"></div>
+        <div id="level-info" class="level-info">
+          <span id="current-level">A1</span>
+          <button id="change-level-btn" class="change-level-btn">Change Level</button>
+        </div>
+      </div>
+
+      <div id="chat-box" class="chat-box"></div>
+
+      <div class="input-area">
+        <input id="text-input" type="text" placeholder="Type your message..." />
+        <button id="send-btn" class="send-button">Send</button>
+        <button id="mic-btn" class="mic-button" title="Hold to speak">
+          🎤
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/script.js"></script>
+</body>
+</html>

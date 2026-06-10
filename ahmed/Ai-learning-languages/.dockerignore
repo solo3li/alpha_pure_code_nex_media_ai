@@ -1,0 +1,30 @@
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Virtual environments
+venv/
+.venv/
+env/
+
+# Secrets — never bake these in
+.env
+
+# Temp audio files generated at runtime
+temp/
+
+# Dev / editor clutter
+.git/
+.gitignore
+.DS_Store
+*.md
+.vscode/
+.idea/
+
+# Docker itself
+Dockerfile
+.dockerignore
+docker-compose*.yml

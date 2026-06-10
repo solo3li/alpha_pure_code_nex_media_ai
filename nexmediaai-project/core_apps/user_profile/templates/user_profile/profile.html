@@ -1,0 +1,726 @@
+{% load static %}
+{% load i18n %}
+{% get_current_language as CURRENT_LANG %}
+<!DOCTYPE html>
+<html lang="{{ CURRENT_LANG }}" dir="{% if CURRENT_LANG == 'ar' %}rtl{% else %}ltr{% endif %}">
+
+<head>
+    <!-- Google Tag Manager -->
+    <script>(function (w, d, s, l, i) {
+            w[l] = w[l] || []; w[l].push({
+                'gtm.start':
+                    new Date().getTime(), event: 'gtm.js'
+            }); var f = d.getElementsByTagName(s)[0],
+                j = d.createElement(s), dl = l != 'dataLayer' ? '&l=' + l : ''; j.async = true; j.src =
+                    'https://www.googletagmanager.com/gtm.js?id=' + i + dl; f.parentNode.insertBefore(j, f);
+        })(window, document, 'script', 'dataLayer', 'GTM-M3QMV7SP');</script>
+    <!-- End Google Tag Manager -->
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% trans "My Dashboard" %} — NEX MEDIA AI</title>
+    <meta name="description" content="{% trans 'View your subscription, plan details and tool usage on NEX MEDIA AI.' %}">
+    <link rel="stylesheet" href="{% static 'user_profile/css/profile.css' %}">
+    <link rel="stylesheet" href="{% static 'home/css/lang-switcher.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css">
+    {% if CURRENT_LANG == 'ar' %}
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&family=Tajawal:wght@300;400;500;700&display=swap">
+    {% endif %}
+
+    <style>
+        /* ── Back link ─────────────────────────────────── */
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--dark-text-muted);
+            text-decoration: none;
+            font-size: var(--font-size-sm);
+            font-weight: 500;
+            margin-bottom: var(--space-6);
+            transition: color var(--transition-fast);
+        }
+
+        .back-link:hover {
+            color: var(--primary-purple);
+        }
+
+        /* ── Page wrapper ─────────────────────────────── */
+        .dashboard-wrapper {
+            width: 100%;
+            max-width: 820px;
+        }
+
+        /* ── Profile hero card ────────────────────────── */
+        .profile-hero {
+            background: var(--dark-surface);
+            border: 1px solid var(--dark-border);
+            border-radius: var(--radius-2xl);
+            padding: var(--space-8);
+            position: relative;
+            overflow: hidden;
+            margin-bottom: var(--space-6);
+            box-shadow: var(--shadow-2xl);
+        }
+
+        .profile-hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--gradient-primary);
+        }
+
+        .hero-top {
+            display: flex;
+            align-items: center;
+            gap: var(--space-6);
+            flex-wrap: wrap;
+        }
+
+        .profile-avatar-wrap {
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .profile-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: var(--radius-full);
+            object-fit: cover;
+            border: 3px solid var(--primary-purple);
+            box-shadow: 0 0 0 6px rgba(139, 92, 246, .15);
+            transition: var(--transition-normal);
+        }
+
+        .profile-avatar:hover {
+            transform: scale(1.05);
+        }
+
+        .avatar-edit {
+            position: absolute;
+            bottom: 4px;
+            right: 4px;
+            width: 30px;
+            height: 30px;
+            border-radius: var(--radius-full);
+            background: var(--gradient-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: var(--shadow-md);
+            transition: var(--transition-fast);
+        }
+
+        .avatar-edit:hover {
+            transform: scale(1.12);
+        }
+
+        .avatar-edit i {
+            color: #fff;
+            font-size: 0.7rem;
+        }
+
+        .hero-info {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .hero-info h1 {
+            font-size: var(--font-size-2xl);
+            font-weight: 700;
+            color: var(--dark-text);
+            margin-bottom: 4px;
+        }
+
+        .hero-info .hero-email {
+            color: var(--dark-text-muted);
+            font-size: var(--font-size-sm);
+            margin-bottom: var(--space-3);
+        }
+
+        .hero-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--space-2);
+            margin-top: var(--space-3);
+        }
+
+        .meta-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 12px;
+            border-radius: var(--radius-full);
+            font-size: 0.72rem;
+            font-weight: 600;
+        }
+
+        .meta-chip.verified {
+            background: rgba(16, 185, 129, .15);
+            color: var(--accent-green);
+            border: 1px solid rgba(16, 185, 129, .25);
+        }
+
+        .meta-chip.unverified {
+            background: rgba(239, 68, 68, .1);
+            color: var(--accent-red);
+            border: 1px solid rgba(239, 68, 68, .2);
+        }
+
+        .meta-chip.country {
+            background: var(--dark-surface-light);
+            color: var(--dark-text-muted);
+            border: 1px solid var(--dark-border);
+        }
+
+        /* ── Dashboard grid ───────────────────────────── */
+        .dash-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--space-5);
+            margin-bottom: var(--space-6);
+        }
+
+        @media (max-width: 600px) {
+            .dash-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* ── Section card ─────────────────────────────── */
+        .dash-card {
+            background: var(--dark-surface);
+            border: 1px solid var(--dark-border);
+            border-radius: var(--radius-xl);
+            padding: var(--space-6);
+            position: relative;
+            overflow: hidden;
+            transition: border-color var(--transition-fast), transform var(--transition-fast);
+        }
+
+        .dash-card:hover {
+            border-color: var(--primary-purple);
+            transform: translateY(-2px);
+        }
+
+        .dash-card .card-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: var(--radius-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: var(--space-4);
+        }
+
+        .card-icon.purple {
+            background: rgba(139, 92, 246, .15);
+            color: var(--primary-purple);
+        }
+
+        .card-icon.orange {
+            background: rgba(245, 158, 11, .15);
+            color: var(--primary-orange);
+        }
+
+        .card-icon.green {
+            background: rgba(16, 185, 129, .15);
+            color: var(--accent-green);
+        }
+
+        .card-icon.blue {
+            background: rgba(59, 130, 246, .15);
+            color: var(--primary-blue);
+        }
+
+        .card-icon i {
+            font-size: 1.1rem;
+        }
+
+        .dash-card .card-label {
+            font-size: var(--font-size-xs);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: .06em;
+            color: var(--dark-text-muted);
+            margin-bottom: 4px;
+        }
+
+        .dash-card .card-value {
+            font-size: var(--font-size-xl);
+            font-weight: 700;
+            color: var(--dark-text);
+        }
+
+        .dash-card .card-sub {
+            font-size: var(--font-size-xs);
+            color: var(--dark-text-muted);
+            margin-top: 4px;
+        }
+
+        /* Days left pill */
+        .days-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 3px 10px;
+            border-radius: var(--radius-full);
+            font-size: 0.72rem;
+            font-weight: 700;
+            margin-top: var(--space-2);
+        }
+
+        .days-pill.ok {
+            background: rgba(16, 185, 129, .15);
+            color: var(--accent-green);
+            border: 1px solid rgba(16, 185, 129, .25);
+        }
+
+        .days-pill.warn {
+            background: rgba(245, 158, 11, .15);
+            color: var(--primary-orange);
+            border: 1px solid rgba(245, 158, 11, .25);
+        }
+
+        .days-pill.crit {
+            background: rgba(239, 68, 68, .12);
+            color: var(--accent-red);
+            border: 1px solid rgba(239, 68, 68, .25);
+        }
+
+        /* plan highlight */
+        .plan-name-badge {
+            display: inline-block;
+            padding: 4px 14px;
+            border-radius: var(--radius-full);
+            font-size: var(--font-size-sm);
+            font-weight: 700;
+            background: var(--gradient-primary);
+            color: #fff;
+            margin-top: 6px;
+        }
+
+        /* Sub period bar */
+        .sub-progress-wrap {
+            margin-top: var(--space-4);
+        }
+
+        .sub-progress-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.7rem;
+            color: var(--dark-text-muted);
+            margin-bottom: 6px;
+        }
+
+        .sub-bar {
+            height: 6px;
+            border-radius: 99px;
+            background: var(--dark-bg);
+            overflow: hidden;
+        }
+
+        .sub-bar-fill {
+            height: 100%;
+            border-radius: 99px;
+            background: var(--gradient-primary);
+            transition: width 1s ease;
+        }
+
+        /* ── Tool usage section ───────────────────────── */
+        .section-title {
+            font-size: var(--font-size-lg);
+            font-weight: 700;
+            color: var(--dark-text);
+            margin-bottom: var(--space-4);
+            display: flex;
+            align-items: center;
+            gap: var(--space-3);
+        }
+
+        .section-title i {
+            color: var(--primary-purple);
+        }
+
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+            gap: var(--space-4);
+            margin-bottom: var(--space-6);
+        }
+
+        .tool-card {
+            background: var(--dark-surface);
+            border: 1px solid var(--dark-border);
+            border-radius: var(--radius-xl);
+            padding: var(--space-5);
+            transition: border-color var(--transition-fast), transform var(--transition-fast);
+        }
+
+        .tool-card:hover {
+            border-color: var(--primary-purple);
+            transform: translateY(-2px);
+        }
+
+        .tool-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: var(--space-3);
+        }
+
+        .tool-name {
+            font-size: var(--font-size-sm);
+            font-weight: 600;
+            color: var(--dark-text);
+            flex: 1;
+            margin-right: var(--space-2);
+        }
+
+        .tool-count {
+            font-size: var(--font-size-xs);
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .tool-count.ok {
+            color: var(--accent-green);
+        }
+
+        .tool-count.warn {
+            color: var(--primary-orange);
+        }
+
+        .tool-count.full {
+            color: var(--accent-red);
+        }
+
+        .usage-bar {
+            height: 6px;
+            border-radius: 99px;
+            background: var(--dark-bg);
+            overflow: hidden;
+            margin-bottom: var(--space-2);
+        }
+
+        .usage-bar-fill {
+            height: 100%;
+            border-radius: 99px;
+            transition: width 1.2s cubic-bezier(.4, 0, .2, 1);
+        }
+
+        .usage-bar-fill.ok {
+            background: linear-gradient(90deg, var(--accent-green), #34d399);
+        }
+
+        .usage-bar-fill.warn {
+            background: linear-gradient(90deg, var(--primary-orange), #fcd34d);
+        }
+
+        .usage-bar-fill.full {
+            background: linear-gradient(90deg, var(--accent-red), #f87171);
+        }
+
+        .usage-label {
+            font-size: 0.68rem;
+            color: var(--dark-text-muted);
+        }
+
+        /* No tools placeholder */
+        .no-tools {
+            text-align: center;
+            padding: var(--space-8);
+            color: var(--dark-text-muted);
+            font-size: var(--font-size-sm);
+            background: var(--dark-surface);
+            border: 1px dashed var(--dark-border);
+            border-radius: var(--radius-xl);
+            margin-bottom: var(--space-6);
+        }
+
+        .no-tools i {
+            font-size: 2rem;
+            margin-bottom: var(--space-3);
+            display: block;
+        }
+
+        /* ── Action buttons ───────────────────────────── */
+        .actions-row {
+            display: flex;
+            gap: var(--space-4);
+            flex-wrap: wrap;
+        }
+
+        .actions-row .btn {
+            flex: 1;
+            min-width: 140px;
+        }
+
+        /* Popup */
+        .popup {
+            position: fixed;
+            bottom: var(--space-6);
+            right: var(--space-6);
+            background: var(--accent-green);
+            color: #fff;
+            padding: var(--space-4) var(--space-6);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-xl);
+            display: none;
+            align-items: center;
+            gap: var(--space-3);
+            font-weight: 500;
+            z-index: 9999;
+            opacity: 1;
+            transition: opacity var(--transition-normal);
+            animation: slideInUp .3s ease-out;
+        }
+
+        @keyframes slideInUp {
+            from {
+                transform: translateY(100%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+    </style>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // Popup for image update
+            const popup = document.getElementById('popup-message');
+            if (popup) {
+                popup.style.display = 'flex';
+                setTimeout(function () {
+                    popup.style.opacity = '0';
+                    setTimeout(function () { popup.style.display = 'none'; }, 300);
+                }, 4000);
+            }
+
+            // Animate bars on load
+            document.querySelectorAll('[data-width]').forEach(el => {
+                setTimeout(() => { el.style.width = el.dataset.width + '%'; }, 200);
+            });
+        });
+
+        function triggerFileInput() {
+            document.getElementById('file-input').click();
+        }
+    </script>
+</head>
+
+<body>
+    <!-- Google Tag Manager (noscript) -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-M3QMV7SP" height="0" width="0"
+            style="display:none;visibility:hidden"></iframe></noscript>
+
+    <div class="background-overlay"></div>
+
+    <div class="container" style="align-items: flex-start; padding-top: 2.5rem; padding-bottom: 2.5rem;">
+        <div style="position: fixed; top: 1rem; right: 1rem; z-index: 9999;">{% include 'partials/language_switcher.html' %}</div>
+        <div class="dashboard-wrapper">
+
+            <!-- Back link -->
+            <a href="/" class="back-link">
+                <i class="fas fa-arrow-left"></i>
+                {% trans "Back to Home" %}
+            </a>
+
+            <!-- ── Profile Hero ─────────────────────────── -->
+            <div class="profile-hero">
+                <div class="hero-top">
+                    <div class="profile-avatar-wrap">
+                        <img src="{{ profile_image_path }}" alt="Profile Image" class="profile-avatar"
+                            id="profile-image">
+                        <div class="avatar-edit" onclick="triggerFileInput()" title="{% trans 'Change photo' %}">
+                            <i class="fas fa-camera"></i>
+                        </div>
+                        <form action="{% url 'upload_profile_image' %}" method="POST" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            <input type="file" name="profile_image" id="file-input" style="display:none;"
+                                onchange="this.form.submit()">
+                        </form>
+                    </div>
+
+                    <div class="hero-info">
+                        <h1>{{ username }}</h1>
+                        <p class="hero-email"><i class="fas fa-envelope" style="margin-right:6px;opacity:.5;"></i>{{ email }}</p>
+                        <div class="hero-meta">
+                            {% if is_verified %}
+                            <span class="meta-chip verified"><i class="fas fa-check-circle"></i> {% trans "Verified" %}</span>
+                            {% else %}
+                            <span class="meta-chip unverified"><i class="fas fa-times-circle"></i> {% trans "Not Verified" %}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── Subscription Stats Grid ─────────────── -->
+            <div class="dash-grid">
+
+                <!-- Plan -->
+                <div class="dash-card">
+                    <div class="card-icon purple"><i class="fas fa-crown"></i></div>
+                    <div class="card-label">{% trans "Current Plan" %}</div>
+                    <div class="card-value">
+                        <span class="plan-name-badge">
+                            {% if subscribed %}{{ plan_name }}{% else %}{% trans "Free" %}{% endif %}
+                        </span>
+                    </div>
+                    {% if not subscribed %}
+                    <div class="card-sub" style="margin-top:10px;">
+                        <a href="/#container-sub" style="color:var(--primary-purple);font-size:0.8rem;font-weight:600;">
+                            <i class="fas fa-bolt"></i> {% trans "Upgrade Now" %}
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Status / Days Left -->
+                <div class="dash-card">
+                    <div class="card-icon {% if subscribed %}green{% else %}orange{% endif %}">
+                        <i class="fas {% if subscribed %}fa-shield-alt{% else %}fa-unlock-alt{% endif %}"></i>
+                    </div>
+                    <div class="card-label">{% trans "Status" %}</div>
+                    <div class="card-value">{% if subscribed %}{% trans "Active" %}{% else %}{% trans "Inactive" %}{% endif %}</div>
+                    {% if subscribed and days_left is not None %}
+                    <div>
+                        {% if days_left > 14 %}
+                        <span class="days-pill ok"><i class="fas fa-clock"></i> {{ days_left }} {% trans "days left" %}</span>
+                        {% elif days_left > 3 %}
+                        <span class="days-pill warn"><i class="fas fa-exclamation-triangle"></i> {{ days_left }} {% trans "days left" %}</span>
+                        {% else %}
+                        <span class="days-pill crit"><i class="fas fa-fire"></i> {{ days_left }} {% trans "days left" %}</span>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Start Date -->
+                <div class="dash-card">
+                    <div class="card-icon blue"><i class="fas fa-calendar-plus"></i></div>
+                    <div class="card-label">{% trans "Start Date" %}</div>
+                    <div class="card-value">
+                        {% if sub_start %}{{ sub_start|date:"M d, Y" }}{% else %}—{% endif %}
+                    </div>
+                    <div class="card-sub">{% trans "Subscription began" %}</div>
+                </div>
+
+                <!-- End Date -->
+                <div class="dash-card">
+                    <div class="card-icon orange"><i class="fas fa-calendar-times"></i></div>
+                    <div class="card-label">{% trans "Expiry Date" %}</div>
+                    <div class="card-value">
+                        {% if sub_end %}{{ sub_end|date:"M d, Y" }}{% else %}—{% endif %}
+                    </div>
+                    {% if sub_start and sub_end %}
+                    <div class="sub-progress-wrap">
+                        <div class="sub-progress-label">
+                            <span>{{ sub_start|date:"M d" }}</span>
+                            <span>{{ sub_end|date:"M d" }}</span>
+                        </div>
+                        <div class="sub-bar">
+                            <div class="sub-bar-fill" data-width="{{ elapsed_pct }}" style="width:0%;"></div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+            <!-- ── Tool Usage ────────────────────────────── -->
+            <div class="section-title">
+                <i class="fas fa-tachometer-alt"></i>
+                {% trans "Tool Usage & Trials" %}
+            </div>
+
+            {% if tool_usage_data %}
+            <div class="tools-grid">
+                {% for tool in tool_usage_data %}
+                {% if tool.percentage >= 80 %}
+                {% with status="full" %}
+                <div class="tool-card">
+                    <div class="tool-header">
+                        <span class="tool-name">{{ tool.name }}</span>
+                        <span class="tool-count {{ status }}">{{ tool.used }}/{{ tool.max }}</span>
+                    </div>
+                    <div class="usage-bar">
+                        <div class="usage-bar-fill {{ status }}" data-width="{{ tool.percentage }}" style="width:0%;">
+                        </div>
+                    </div>
+                    <div class="usage-label">{{ tool.percentage }}% {% trans "used" %}</div>
+                </div>
+                {% endwith %}
+                {% elif tool.percentage >= 50 %}
+                {% with status="warn" %}
+                <div class="tool-card">
+                    <div class="tool-header">
+                        <span class="tool-name">{{ tool.name }}</span>
+                        <span class="tool-count {{ status }}">{{ tool.used }}/{{ tool.max }}</span>
+                    </div>
+                    <div class="usage-bar">
+                        <div class="usage-bar-fill {{ status }}" data-width="{{ tool.percentage }}" style="width:0%;">
+                        </div>
+                    </div>
+                    <div class="usage-label">{{ tool.percentage }}% {% trans "used" %}</div>
+                </div>
+                {% endwith %}
+                {% else %}
+                {% with status="ok" %}
+                <div class="tool-card">
+                    <div class="tool-header">
+                        <span class="tool-name">{{ tool.name }}</span>
+                        <span class="tool-count {{ status }}">{{ tool.used }}/{{ tool.max }}</span>
+                    </div>
+                    <div class="usage-bar">
+                        <div class="usage-bar-fill {{ status }}" data-width="{{ tool.percentage }}" style="width:0%;">
+                        </div>
+                    </div>
+                    <div class="usage-label">{{ tool.percentage }}% {% trans "used" %}</div>
+                </div>
+                {% endwith %}
+                {% endif %}
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="no-tools">
+                <i class="fas fa-tools"></i>
+                {% trans "No tool usage data yet. Start using our tools after subscribing!" %}
+            </div>
+            {% endif %}
+
+            <!-- ── Actions ───────────────────────────────── -->
+            <div class="actions-row">
+                <a href="/history" class="btn btn-secondary">
+                    <i class="fas fa-history"></i>
+                    {% trans "History" %}
+                </a>
+                <a href="{% url 'logout' %}" class="btn btn-primary">
+                    <i class="fas fa-sign-out-alt"></i>
+                    {% trans "Logout" %}
+                </a>
+            </div>
+
+        </div>
+    </div>
+
+    {% if image_updated %}
+    <div class="popup" id="popup-message">
+        <i class="fas fa-check-circle"></i>
+        <span>{% trans "Profile image updated successfully!" %}</span>
+    </div>
+    {% endif %}
+
+</body>
+
+</html>

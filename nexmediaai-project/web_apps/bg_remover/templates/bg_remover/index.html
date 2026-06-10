@@ -1,0 +1,439 @@
+{% load static %}
+{% load i18n %}
+{% get_current_language as CURRENT_LANG %}
+<!DOCTYPE html>
+<html lang="{{ CURRENT_LANG }}" dir="{% if CURRENT_LANG == 'ar' %}rtl{% else %}ltr{% endif %}">
+<head>
+  <!-- Google Tag Manager -->
+  <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+  new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+  'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+  })(window,document,'script','dataLayer','GTM-M3QMV7SP');</script>
+  <!-- End Google Tag Manager -->
+  
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NEX MEDIA AI - Background Remover</title>
+  
+  <!-- Fonts and Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css" integrity="sha512-MV7K8+y+gLIBoVD59lQIYicR65iaqukzvf/nwasF0nqhPay5w/9lJmVM2hMDcnK1OnMGCdVK+iQrJ7lzPJQd1w==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link rel="stylesheet" href="/static/bg_remover/css/style.css">
+  <link rel="icon" type="image/x-icon" href="/static/bg_remover/icons/removeImg.ico">
+  
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+  <!-- Language Switcher CSS -->
+  <link rel="stylesheet" href="{% static 'home/css/lang-switcher.css' %}">
+  {% if CURRENT_LANG == 'ar' %}
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&family=Tajawal:wght@300;400;500;700&display=swap">
+  {% endif %}
+</head>
+<body>
+  <!-- Google Tag Manager (noscript) -->
+  <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-M3QMV7SP"
+  height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+  <!-- End Google Tag Manager (noscript) -->
+
+
+
+  <!-- Sidebar -->
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="slide-profile">
+        <img class="profile-circle" src="https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=150" alt="Profile Image">
+        <span class="username">John Doe</span>
+        <div class="subscription-status">
+          <div class="status-badge inactive">
+            <i class="fas fa-times-circle"></i>
+            <span>Free Plan</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sidebar-nav">
+      <a href="/home" class="nav-link">
+        <i class="fas fa-home"></i>
+        Home
+      </a>
+      <a href="/history" class="nav-link">
+        <i class="fas fa-history"></i>
+        History
+      </a>
+      <a href="/profile" class="nav-link">
+        <i class="fas fa-user"></i>
+        Profile
+      </a>
+      <a onclick="goTo('container-sub')" class="nav-link upgrade">
+        <i class="fas fa-rocket"></i>
+        Subscribe Now
+      </a>
+    </div>
+  </div>
+
+  <!-- Navigation -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <div class="logo">
+        <div class="logo-icon">
+          <i class="fas fa-image"></i>
+        </div>
+        <span>Background Remover</span>
+      </div>
+      
+      <div class="nav-menu">
+        <div class="nav-item">
+          <a href="/">
+            <i class="fas fa-arrow-left"></i>
+            Back to Home
+          </a>
+        </div>
+      </div>
+
+      <div class="profile-section">
+        {% include "partials/language_switcher.html" %}
+        <div class="trial-counter">
+          <span class="trial-label">Free Trials</span>
+          <span class="trial-count">{{ number_of_trials }}</span>
+        </div>
+        <button class="upgrade-btn" onclick="window.location.href='/#container-sub'">
+          <i class="fas fa-bolt"></i>
+          Upgrade
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <!-- Hero Section -->
+    <div class="hero-section">
+      <div class="container">
+        <div class="hero-content">
+          <h1 class="hero-title">Remove Background</h1>
+          <p class="hero-subtitle">Effortlessly remove backgrounds from your images with our AI tool.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tool Section -->
+    <div class="tool-section">
+      <div class="container">
+        <div class="tool-grid">
+          <!-- Image Display Area -->
+          <div class="image-display-area">
+            <div class="image-container" id="originalImageContainer">
+              <div class="image-placeholder" id="uploaded">
+                <div class="placeholder-icon">
+                  <i class="fas fa-image"></i>
+                </div>
+                <h3>Upload your image</h3>
+                <p>Select an image to remove its background</p>
+              </div>
+              <div class="image-content" id="original" style="display: none;">
+                <h3>Original Image</h3>
+                <img id="originalImage" src="" alt="Original Image">
+              </div>
+            </div>
+
+            <div class="image-container" id="processedImageContainer" style="display: none;">
+              <div class="image-content">
+                <h3>Processed Image</h3>
+                <img id="processedImages" src="" alt="Processed Image">
+              </div>
+            </div>
+
+            <div class="image-container loading-container" id="loads" style="display: none;">
+              <div class="loading-content">
+                <div class="loader" id="loadings"></div>
+                <h3>Processing Image</h3>
+                <p>Please wait while we remove the background...</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Upload Controls -->
+          <div class="upload-controls">
+            <div class="upload-card">
+              <form id="uploadForm" method="POST" enctype="multipart/form-data">
+                <div class="upload-header">
+                  <h2>Upload Image</h2>
+                </div>
+                
+                <input type="file" name="file" id="fileInput" accept="image/*" required>
+                <label for="fileInput" class="file-upload-area">
+                  <div class="upload-icon">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                  </div>
+                  <div class="upload-text">
+                    <span class="upload-title">Import Media</span>
+                    <p class="upload-description">Drag & drop media files from your device to import.</p>
+                  </div>
+                </label>
+              </form>
+
+              <div class="action-buttons">
+                <button id="generateButton" class="primary-btn">
+                  <span>{% trans "Generate" %}</span>
+                  <i class="fas fa-magic"></i>
+                </button>
+                <button id="downloadButton" class="secondary-btn" style="display: none;">
+                  <span>{% trans "Download" %}</span>
+                  <i class="fas fa-download"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Trial Popup -->
+  <div id="trialPopup" class="popup-overlay" style="display: none;">
+    <div class="popup-content">
+      <span class="popup-close">&times;</span>
+      <div class="popup-icon">
+        <i class="fas fa-exclamation-triangle"></i>
+      </div>
+      <h2>Your Free Trials Are Over</h2>
+      <p>You've used all your free trial attempts. Subscribe now to continue using this tool.</p>
+      <button id="subscribeButton" class="popup-btn">
+        <i class="fas fa-crown"></i>
+        Subscribe Now
+      </button>
+    </div>
+  </div>
+
+  <!-- Error Popup -->
+  <div id="errorPopup" class="error-notification" style="display: none;">
+    <div class="error-content">
+      <i class="fas fa-exclamation-circle"></i>
+      <span class="error-message"></span>
+    </div>
+  </div>
+
+  <script>
+    // Toggle sidebar function
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      sidebar.classList.toggle('active');
+    }
+
+    // Error popup function
+    function showErrorPopup(message) {
+      const popup = $('#errorPopup');
+      popup.find('.error-message').text(message);
+      popup.fadeIn();
+      setTimeout(function () {
+        popup.fadeOut();
+      }, 5000);
+    }
+
+    $(document).ready(function () {
+      // Check trials when page loads and disable file input if no trials
+      checkTrialsAndSetState();
+
+      // Handle clicks on disabled file label
+      $('.file-upload-area').on('click', function(e) {
+        if ($(this).hasClass('disabled')) {
+          e.preventDefault();
+          e.stopPropagation();
+          $('#trialPopup').fadeIn();
+          return false;
+        }
+      });
+
+      $('#fileInput').on('change', function () {
+        // Check trials before allowing file selection
+        $.ajax({
+          url: '/bg-remover/get_trials_left/',
+          type: 'GET',
+          success: function (data) {
+            if (data.trials_left <= 0) {
+              // No trials left, clear the file input and show popup
+              $('#fileInput').val('');
+              $('#trialPopup').fadeIn();
+              return;
+            }
+
+            // User has trials, proceed with file preview
+            const file = $('#fileInput')[0].files[0];
+            if (file) {
+              const reader = new FileReader();
+              reader.onload = function (e) {
+                $('#originalImage').attr('src', e.target.result).show();
+                $('#originalImageContainer').show();
+                $('#uploaded').hide();
+                $('#original').show();
+                $('#generateButton').show();
+                $('#processedImageContainer').hide();
+                $('#downloadButton').hide();
+              };
+              reader.readAsDataURL(file);
+            }
+          },
+          error: function () {
+            showErrorPopup('Failed to check trial status');
+            $('#fileInput').val(''); // Clear the file input on error
+          }
+        });
+      });
+
+      $('#generateButton').on('click', function (e) {
+        e.preventDefault();
+
+        const fileInput = $('#fileInput')[0].files[0];
+        if (!fileInput) {
+          showErrorPopup('Please upload an image first.');
+          return;
+        }
+
+        // First, check if user has trials left BEFORE uploading
+        $.ajax({
+          url: '/bg-remover/get_trials_left/',
+          type: 'GET',
+          success: function (data) {
+            if (data.trials_left <= 0) {
+              // No trials left, show popup immediately
+              $('#trialPopup').fadeIn();
+              return;
+            }
+
+            // User has trials, proceed with upload
+            const formData = new FormData();
+            formData.append('file', fileInput);
+
+            $.ajax({
+              url: '/bg-remover/upload/',
+              type: 'POST',
+              data: formData,
+              contentType: false,
+              processData: false,
+              success: function (uploadData) {
+                if (uploadData.show === 'No-sub-no-Trial') {
+                  $('#trialPopup').fadeIn();
+                  return;
+                }
+
+                // File uploaded successfully, now process it
+                $('#originalImageContainer').hide();
+                $('#loads').show();
+                $('#processedImages').attr('src', '');
+
+                $.ajax({
+                  url: '/bg-remover/remove_bg/',
+                  type: 'POST',
+                  contentType: 'application/json',
+                  data: JSON.stringify({ filename: uploadData.filename }),
+                  success: function (processData) {
+                    $('#loads').hide();
+                    $('#processedImages').attr('src', processData.show);
+                    $('#downloadButton').data('href', processData.show);
+                    $('#processedImageContainer').show();
+                    $('#processedImages').show();
+                    $('#downloadButton').show();
+                    updateTrialCount();
+                  },
+                  error: function (xhr, status, error) {
+                    $('#loads').hide();
+                    console.error('Background removal error:', error);
+                    if (xhr.responseJSON && xhr.responseJSON.show === 'No-sub-no-Trial') {
+                      $('#trialPopup').fadeIn();
+                    } else {
+                      showErrorPopup('Failed to remove background');
+                    }
+                  }
+                });
+              },
+              error: function (xhr, status, error) {
+                console.error('Upload error:', error);
+                if (xhr.responseJSON && xhr.responseJSON.show === 'No-sub-no-Trial') {
+                  $('#trialPopup').fadeIn();
+                } else {
+                  showErrorPopup('Failed to upload image');
+                }
+              }
+            });
+          },
+          error: function () {
+            showErrorPopup('Failed to check trial status');
+          }
+        });
+      });
+
+      $('#downloadButton').on('click', function () {
+        const url = $(this).data('href');
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'processed-image.png';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      });
+
+      $(document).on('click', '.popup-close', function () {
+        $('#trialPopup').fadeOut();
+      });
+
+      $('#subscribeButton').on('click', function () {
+        window.location.href = 'https://nexmediaai.com/#third';
+      });
+    });
+
+    function checkTrialsAndSetState() {
+      $.ajax({
+        url: '/bg-remover/get_trials_left/',
+        type: 'GET',
+        success: function (data) {
+          $('.trial-count').text(data.trials_left); // Update trial count display
+          
+          if (data.trials_left <= 0) {
+            // Disable file input and add visual feedback
+            $('#fileInput').prop('disabled', true);
+            $('.file-upload-area').addClass('disabled');
+            $('.upload-title').text('No Trials Left - Subscribe to Continue');
+            $('.upload-description').text('Click here to upgrade your subscription.');
+          } else {
+            // Enable file input
+            $('#fileInput').prop('disabled', false);
+            $('.file-upload-area').removeClass('disabled');
+            $('.upload-title').text('Import Media');
+            $('.upload-description').text('Drag & drop media files from your device to import.');
+          }
+        },
+        error: function () {
+          console.error('Failed to check trial status on page load');
+          // On error, assume no trials and disable
+          $('#fileInput').prop('disabled', true);
+          $('.file-upload-area').addClass('disabled');
+        }
+      });
+    }
+
+    function updateTrialCount() {
+      $.ajax({
+        url: '/bg-remover/get_trials_left/',
+        type: 'GET',
+        success: function (data) {
+          if (data.trials_left !== undefined) {
+            $('.trial-count').text(data.trials_left);
+            if (data.trials_left === 0) {
+              $('#trialPopup').fadeIn();
+            }
+          } else {
+            console.error('Invalid response for trials left');
+          }
+        },
+        error: function () {
+          console.error('Failed to fetch the updated trial count');
+        }
+      });
+    }
+  </script>
+
+  <!-- Language Switcher JS -->
+  <script src="{% static 'home/js/lang-switcher.js' %}"></script>
+</body>
+</html>

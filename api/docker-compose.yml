@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: job-hunter-db
+    restart: always
+    environment:
+      POSTGRES_DB: job_hunter_stats
+      POSTGRES_USER: jh_user
+      POSTGRES_PASSWORD: jh_secure_password_99
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U jh_user -d job_hunter_stats"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  counter-api:
+    build: .
+    container_name: job-hunter-counter
+    restart: always
+    ports:
+      - "7418:7418"
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      - DATABASE_URL=postgresql://jh_user:jh_secure_password_99@db:5432/job_hunter_stats
+      - PORT=7418
+      - ALLOWED_ORIGIN=https://ramiadel.cloud
+      - ALLOWED_REFERER_PREFIX=https://ramiadel.cloud/job-hunter
+
+volumes:
+  pgdata:

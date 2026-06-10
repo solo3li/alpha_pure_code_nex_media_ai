@@ -1,0 +1,35 @@
+[33m568658c[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m HEAD@{0}: pull: Fast-forward
+[33m9d5ea55[m HEAD@{1}: commit: reset it to 100
+[33m848afdc[m HEAD@{2}: commit: test
+[33md1d8999[m HEAD@{3}: commit: test
+[33m2f5bc36[m HEAD@{4}: commit: maxed timeout for gunicorn to 200
+[33mef38363[m HEAD@{5}: commit: maxed timeout to 200
+[33mf1f5059[m HEAD@{6}: commit: maxed timeout to 100
+[33ma3f8a32[m HEAD@{7}: commit: maxed timout
+[33m88e0fd3[m HEAD@{8}: commit: added admin cust
+[33md306291[m HEAD@{9}: commit: added admin cust
+[33mf9285a0[m HEAD@{10}: commit: added admin cust
+[33m6183a9c[m HEAD@{11}: commit: added mail contact
+[33m5b26589[m HEAD@{12}: commit: Addes subs
+[33m0573bc8[m HEAD@{13}: commit: added last touches
+[33m51ebd6e[m HEAD@{14}: commit: added last touches
+[33mafb4670[m HEAD@{15}: commit: added last touches
+[33m12aae1d[m HEAD@{16}: commit: added last touches
+[33maf0c883[m HEAD@{17}: commit: Addes subs
+[33ma20f9b7[m HEAD@{18}: commit: Addes subs
+[33mec77ba7[m HEAD@{19}: commit: Addes subs
+[33m0220288[m HEAD@{20}: commit: Addes subs
+[33me739659[m HEAD@{21}: commit: Addes subs
+[33m5fac176[m HEAD@{22}: commit: Added lahjati
+[33mb56ef83[m HEAD@{23}: commit: Added lahjati
+[33mf7baaad[m HEAD@{24}: commit: Added lahjati
+[33m1be2bda[m HEAD@{25}: commit: Added lahjati
+[33m6ad5f4d[m HEAD@{26}: commit: Added lahjati
+[33m3455799[m HEAD@{27}: commit: Added lahjati
+[33m134e436[m HEAD@{28}: commit: Added lahjati
+[33m489a559[m HEAD@{29}: commit: Added lahjati
+[33m134aeff[m HEAD@{30}: commit: Added lahjati
+[33m318f730[m HEAD@{31}: commit: edited user admin
+[33mf22279c[m HEAD@{32}: commit: edited user admin
+[33me5d07ed[m HEAD@{33}: commit: edited user admin
+[33m63170e1[m HEAD@{34}: clone: from https://github.com/RamiAdell/nexmediaai.git

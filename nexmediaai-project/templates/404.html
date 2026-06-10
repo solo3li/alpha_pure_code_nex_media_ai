@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>404 - Page Not Found</title>
+
+<style>
+/* === All your existing CSS pasted here (shortened slightly) === */
+
+/* Import Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+:root {
+  --primary-purple: #8B5CF6;
+  --primary-orange: #F59E0B;
+  --primary-blue: #3B82F6;
+  --dark-bg: #0F0F0F;
+  --dark-surface: #1A1A1A;
+  --dark-border: #2D2D2D;
+  --dark-text: #E5E5E5;
+  --dark-text-muted: #A0A0A0;
+  --gradient-primary: linear-gradient(135deg, var(--primary-purple) 0%, var(--primary-orange) 100%);
+  --radius-xl: 1.5rem;
+  --font-size-6xl: 3.75rem;
+  --font-size-3xl: 1.875rem;
+  --font-size-lg: 1.125rem;
+  --transition-normal: 300ms ease-in-out;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--dark-bg);
+  color: var(--dark-text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  text-align: center;
+  background-image: 
+    radial-gradient(circle at 20% 80%, rgba(139, 92, 246, 0.15) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(245, 158, 11, 0.15) 0%, transparent 50%);
+}
+
+/* 404 container */
+.error-container {
+  max-width: 600px;
+  padding: 3rem;
+  background: var(--dark-surface);
+  border: 1px solid var(--dark-border);
+  border-radius: var(--radius-xl);
+  box-shadow: 0 0 40px rgba(0,0,0,0.5);
+  animation: fadeIn 0.8s ease-in-out;
+}
+
+.error-code {
+  font-size: var(--font-size-6xl);
+  font-weight: 800;
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 1rem;
+}
+
+.error-message {
+  font-size: var(--font-size-3xl);
+  color: var(--dark-text);
+  margin-bottom: 1rem;
+}
+
+.error-description {
+  font-size: var(--font-size-lg);
+  color: var(--dark-text-muted);
+  margin-bottom: 2rem;
+}
+
+.home-btn {
+  display: inline-block;
+  padding: 0.8rem 2rem;
+  background: var(--gradient-primary);
+  color: white;
+  text-decoration: none;
+  border-radius: var(--radius-xl);
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  transition: transform var(--transition-normal), box-shadow var(--transition-normal);
+}
+
+.home-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(139, 92, 246, 0.3);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+</style>
+</head>
+<body>
+  <div class="error-container">
+    <div class="error-code">404</div>
+    <div class="error-message">Page Not Found</div>
+    <div class="error-description">
+      Oops! The page you’re looking for doesn’t exist or has been moved.
+    </div>
+    <a href="/" class="home-btn">Go Home</a>
+  </div>
+</body>
+</html>

@@ -1,0 +1,256 @@
+/* =============================================================
+   Language Switcher — shared across all templates
+   Designed to blend into both light & dark themes.
+   ============================================================= */
+
+/* ── Toggle Button ─────────────────────────────────────────── */
+.lang-switcher {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    z-index: 99999;
+}
+
+/* Ensure dropdown is not clipped on app pages (voice-to-text, text-to-voice, etc.) */
+.navbar,
+.nav-container,
+.nav-right {
+    overflow: visible !important;
+}
+
+.lang-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 13px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 999px;
+    color: #C9C9C9;
+    font-size: 0.8rem;
+    font-weight: 600;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    transition: background 200ms ease, border-color 200ms ease, color 200ms ease;
+    white-space: nowrap;
+    line-height: 1;
+}
+
+.lang-btn:hover {
+    background: rgba(139, 92, 246, 0.18);
+    border-color: rgba(139, 92, 246, 0.5);
+    color: #fff;
+}
+
+.lang-switcher.open .lang-btn {
+    background: rgba(139, 92, 246, 0.22);
+    border-color: rgba(139, 92, 246, 0.6);
+    color: #fff;
+}
+
+.lang-globe {
+    display: flex;
+    align-items: center;
+    font-size: 0.85rem;
+    color: #A78BFA;
+}
+
+.lang-current {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+.lang-arrow {
+    font-size: 0.6rem;
+    opacity: 0.6;
+    transition: transform 220ms ease;
+}
+
+.lang-switcher.open .lang-arrow {
+    transform: rotate(180deg);
+}
+
+/* ── Dropdown Panel ────────────────────────────────────────── */
+.lang-dropdown {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    background: #1A1A2E;
+    border: 1px solid rgba(139, 92, 246, 0.25);
+    border-radius: 14px;
+    padding: 6px;
+    min-width: 160px;
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(139, 92, 246, 0.08);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-8px) scale(0.97);
+    transition: opacity 200ms ease, transform 200ms ease, visibility 200ms ease;
+    pointer-events: none;
+    z-index: 100000;
+}
+
+/* RTL: open dropdown to the left */
+[dir="rtl"] .lang-dropdown {
+    right: auto;
+    left: 0;
+}
+
+.lang-switcher.open .lang-dropdown {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0) scale(1);
+    pointer-events: auto;
+}
+
+/* ── Option Buttons ────────────────────────────────────────── */
+.lang-dropdown form {
+    margin: 0;
+    padding: 0;
+}
+
+.lang-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 9px 12px;
+    background: transparent;
+    border: none;
+    border-radius: 10px;
+    color: #C9C9C9;
+    font-size: 0.85rem;
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 160ms ease, color 160ms ease;
+    text-align: left;
+    position: relative;
+}
+
+[dir="rtl"] .lang-option {
+    text-align: right;
+    flex-direction: row-reverse;
+}
+
+[dir="rtl"] .sides i {
+margin-left: 8px;
+}
+
+
+.lang-option:hover {
+    background: rgba(139, 92, 246, 0.15);
+    color: #fff;
+}
+
+.lang-option.active {
+    color: #A78BFA;
+    background: rgba(139, 92, 246, 0.10);
+    font-weight: 600;
+}
+
+.lang-flag {
+    font-size: 1.1rem;
+    flex-shrink: 0;
+}
+
+.lang-check {
+    margin-left: auto;
+    font-size: 0.7rem;
+    color: #A78BFA;
+}
+
+[dir="rtl"] .lang-check {
+    margin-left: 0;
+    margin-right: auto;
+}
+
+/* ── RTL Global Overrides ─────────────────────────────────── */
+/* Applied to <html dir="rtl"> when Arabic is active          */
+[dir="rtl"] body {
+    font-family: 'Tajawal', 'Cairo', 'Inter', sans-serif;
+}
+
+[dir="rtl"] .navbar .nav-container {
+    flex-direction: row-reverse;
+}
+
+[dir="rtl"] .nav-menu {
+    flex-direction: row-reverse;
+}
+
+[dir="rtl"] .dropdown-menu {
+    left: auto;
+    right: 0;
+}
+
+[dir="rtl"] .dropdown-item {
+    flex-direction: row-reverse;
+}
+
+[dir="rtl"] .sidebar {
+    left: -300px;
+    right: auto;
+    border-left: none;
+    border-right: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+[dir="rtl"] .sidebar.active {
+    left: 0;
+}
+
+[dir="rtl"] .hero-content {
+    flex-direction: row-reverse;
+}
+
+[dir="rtl"] .hero-text {
+    /* text-align: right; */
+}
+
+[dir="rtl"] .contact-content {
+    flex-direction: row-reverse;
+}
+
+[dir="rtl"] .contact-item {
+    flex-direction: row-reverse;
+}
+
+/* ── Language switcher inside mobile sidebar ────────────────── */
+.sidebar-lang-switcher {
+    margin-top: var(--space-4, 1rem);
+    padding-top: var(--space-3, 0.75rem);
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.sidebar-lang-switcher .lang-switcher {
+    width: 100%;
+}
+
+.sidebar-lang-switcher .lang-btn {
+    width: 100%;
+    justify-content: center;
+}
+
+/* ── RTL + Mobile: fix .first section and menu button ───────── */
+@media (max-width: 768px) {
+    [dir="rtl"] .first {
+        overflow-x: clip;
+        overflow-y: auto;
+    }
+    [dir="rtl"] .fixed {
+        right: auto;
+        left: 0;
+        justify-content: flex-start;
+    }
+    [dir="rtl"] .hero-content {
+        flex-direction: column;
+        
+    }
+    [dir="rtl"] .hero-text {
+      
+    }
+}
+
+/* ── Arabic Font Load ─────────────────────────────────────── */
+/* Loaded lazily by JS only when Arabic is active             */

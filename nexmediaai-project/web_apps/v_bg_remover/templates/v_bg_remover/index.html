@@ -1,0 +1,648 @@
+{% load i18n %}
+{% get_current_language as CURRENT_LANG %}
+{% load i18n %}
+{% get_current_language as CURRENT_LANG %}
+<!DOCTYPE html>
+<html lang="{{ CURRENT_LANG }}" dir="{% if CURRENT_LANG == 'ar' %}rtl{% else %}ltr{% endif %}" dir="{% if CURRENT_LANG == 'ar' %}rtl{% else %}ltr{% endif %}">
+<head>
+  <!-- Google Tag Manager -->
+  <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+  new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+  'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+  })(window,document,'script','dataLayer','GTM-M3QMV7SP');</script>
+  <!-- End Google Tag Manager -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Background Removal - NEX MEDIA AI</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="/static/v_bg_remover/css/style.css">
+
+  <!-- Language Switcher CSS -->
+  <link rel="stylesheet" href="{% static 'home/css/lang-switcher.css' %}">
+  {% if CURRENT_LANG == 'ar' %}
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&family=Tajawal:wght@300;400;500;700&display=swap">
+  {% endif %}
+
+  <!-- Language Switcher CSS -->
+  <link rel="stylesheet" href="{% static 'home/css/lang-switcher.css' %}">
+  {% if CURRENT_LANG == 'ar' %}
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&family=Tajawal:wght@300;400;500;700&display=swap">
+  {% endif %}
+</head>
+<body>
+  <!-- Google Tag Manager (noscript) -->
+  <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-M3QMV7SP"
+  height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+  <!-- End Google Tag Manager (noscript) -->
+  
+    <div class="background-overlay"></div>
+    
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-left">
+                <i class="fas fa-film nav-icon"></i>
+                <span class="nav-title">Remove Video Background</span>
+            </div>
+            
+            <div class="nav-right">
+        {% include "partials/language_switcher.html" %}
+                <div class="trial-info">
+                    <div class="trial-card">
+                        <span class="trial-label">Minutes Left</span>
+                        <span class="trial-value" id="trials-counter">{{ number_of_trials }} Minutes</span>
+                    </div>
+                    
+                    <div class="trial-card">
+                        <span class="trial-label">Processing</span>
+                        <span class="trial-value" id="active-processes-info">0/2 Active</span>
+                    </div>
+                </div>
+                
+                <button type="button" class="upgrade-btn" onclick="window.location.href='/#container-sub'">
+                    <i class="fas fa-bolt"></i>
+                    <span>Upgrade</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+    
+    <div class="main-content">
+        <div class="page-header">
+            <h1>Remove Video Background</h1>
+            <p>Effortlessly remove backgrounds from your videos with our AI tool.</p>
+        </div>
+        
+        <div class="content-grid">
+            <div class="video-preview-section">
+                <div class="video-container">
+                    <video class="video-player" id="inputVideo" controls style="display: none;">
+                        Your browser does not support the video tag.
+                    </video>
+
+                    <video id="processedVideo" controls style="display: none;">
+                        Your browser does not support the video tag.
+                    </video>
+
+                    <div class="loader-container" id="loader" style="display:none">
+                        <div class="modern-loader"></div>
+                        <p>Processing your video...</p>
+                    </div>
+                    
+                    <!-- Progress Container -->
+                    <div class="progress-section" id="progress-container">
+                        <div class="status-message" id="status-message"></div>
+                        <div class="progress-bar-wrapper">
+                            <div class="progress-bar-fill" id="progress-bar" style="width: 0%">
+                                <span class="progress-text">0%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="upload-section">
+                <form onsubmit="event.preventDefault(); initiateProcessing();" class="upload-form">
+                    <div class="upload-area">
+                        <div id="drop_zone" class="drop-zone">
+                            <div class="drop-zone-content">
+                                <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                                <h3>Upload Your Video</h3>
+                                <p>Drag & drop your video file here or click to browse</p>
+                                <label class="upload-btn" for="file">
+                                    <i class="fas fa-plus"></i>
+                                    Choose File
+                                </label>
+                                <input hidden type="file" id="file" name="file" accept="video/*">
+                            </div>
+                        </div>
+                    </div>
+                </form>
+
+                <div class="action-buttons">
+                    <button id="generateButton" class="generate-btn" onclick="initiateProcessing()">
+                        <i class="fas fa-magic"></i>
+                        Generate
+                    </button>
+                    <button id="downloadButton" class="download-btn" style="display: none;">
+                        <i class="fas fa-download"></i>
+                        Download
+                    </button>
+                </div>
+                
+                <!-- Processing Queue -->
+                <div class="processing-queue">
+                    <div class="queue-header">
+                        <h3>
+                            <i class="fas fa-tasks"></i>
+                            Your Video Processing
+                        </h3>
+                        <button id="refreshQueue" class="refresh-btn" title="Refresh status">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                    </div>
+                    <div class="queue-content">
+                        <div class="queue-items" id="queueItems">
+                            <div class="empty-queue">
+                                <i class="fas fa-video"></i>
+                                <p>No recent video processing</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Trial Popup -->
+    <div id="trialPopup" class="popup-overlay" style="display: none;">
+        <div class="popup-content">
+            <div class="popup-header">
+                <h2>Free Trials Exhausted</h2>
+                <button class="popup-close">&times;</button>
+            </div>
+            <div class="popup-body">
+                <i class="fas fa-exclamation-triangle warning-icon"></i>
+                <p>You've used all your free trial attempts. Subscribe now to continue using this tool.</p>
+                <button id="subscribeButton" class="subscribe-btn">
+                    <i class="fas fa-crown"></i>
+                    Subscribe Now
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alert Popup -->
+    <div id="popupAlert" class="alert-popup"></div>
+
+    <!-- Add this new element for processing ID -->
+    <input type="hidden" id="processingId">
+
+    <script>
+        // DOM Elements
+        const dropZone = document.getElementById('drop_zone');
+        const fileInput = document.getElementById('file');
+        const generateBtn = document.getElementById('generateButton');
+        const inputVideo = document.getElementById('inputVideo');
+        const processedVideo = document.getElementById('processedVideo');
+        const progressContainer = document.getElementById('progress-container');
+        const progressBar = document.getElementById('progress-bar');
+        const statusMessage = document.getElementById('status-message');
+        const loader = document.getElementById('loader');
+        const downloadBtn = document.getElementById('downloadButton');
+        const trialsCounter = document.getElementById('trials-counter');
+        const trialPopup = document.getElementById('trialPopup');
+        let processingQueue = [];
+        const queueItemsContainer = document.getElementById('queueItems');
+        const refreshQueueBtn = document.getElementById('refreshQueue');
+        let currentFile = null;
+        let eventSource = null;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            updateTrials();
+            setupEventListeners();
+            loadProcessingQueue();
+            setInterval(loadProcessingQueue, 30000);
+        });
+
+        refreshQueueBtn.addEventListener('click', loadProcessingQueue);
+
+        async function loadProcessingQueue() {
+            try {
+                const response = await fetch('/video-bg-remover/processing-queue/');
+                if (!response.ok) throw new Error('Failed to load queue');
+                
+                processingQueue = await response.json();
+                renderQueueItems();
+                
+                // Auto-poll any active processes
+                processingQueue.forEach(item => {
+                    if (item.status === 'PROCESSING' || item.status === 'UPLOADING') {
+                        pollQueueItemStatus(item.id);
+                    }
+                });
+            } catch (error) {
+                console.error('Error loading queue:', error);
+            }
+        }
+
+        function renderQueueItems() {
+    if (processingQueue.length === 0) {
+        queueItemsContainer.innerHTML = `
+            <div class="empty-queue">
+                <i class="fas fa-video"></i>
+                <p>No recent video processing</p>
+            </div>
+        `;
+        return;
+    }
+    
+    // Helper function to truncate filename
+    function truncateFilename(filename, maxLength = 30) {
+        if (!filename || filename.length <= maxLength) {
+            return filename || 'My Video';
+        }
+        
+        // Get file extension
+        const lastDotIndex = filename.lastIndexOf('.');
+        if (lastDotIndex === -1) {
+            // No extension, just truncate
+            return filename.substring(0, maxLength - 3) + '...';
+        }
+        
+        const name = filename.substring(0, lastDotIndex);
+        const extension = filename.substring(lastDotIndex);
+        
+        // Calculate available space for name (minus extension and "...")
+        const availableLength = maxLength - extension.length - 3;
+        
+        if (availableLength > 0 && name.length > availableLength) {
+            return name.substring(0, availableLength) + '...' + extension;
+        }
+        
+        return filename;
+    }
+    
+    queueItemsContainer.innerHTML = processingQueue.map(item => `
+        <div class="queue-item" data-id="${item.id}">
+            <div class="queue-item-thumbnail">
+                <img src="${item.thumbnail_url || '/static/images/video-thumbnail.png'}" 
+                     alt="Video thumbnail"
+                     onerror="this.src='/static/images/video-thumbnail.png'">
+            </div>
+            <div class="queue-item-info">
+                <div class="queue-item-name" title="${item.filename || 'My Video'}">${truncateFilename(item.filename)}</div>
+                <div class="queue-item-status">
+                    <span class="status-indicator ${getStatusClass(item.status)}"></span>
+                    <span class="status-text">${getStatusText(item.status)}</span>
+                    ${item.progress ? `<span class="progress-percent">(${Math.round(item.progress)}%)</span>` : ''}
+                </div>
+                <div class="queue-item-progress">
+                    <div class="progress-fill" style="width: ${item.progress || 0}%"></div>
+                </div>
+            </div>
+            <div class="queue-item-actions">
+                ${getActionButtons(item.status, item.id, item.result_file_id)}
+            </div>
+        </div>
+    `).join('');
+}
+
+        function getStatusClass(status) {
+            switch(status) {
+                case 'PROCESSING':
+                case 'UPLOADING':
+                    return 'status-processing';
+                case 'COMPLETED':
+                    return 'status-completed';
+                case 'FAILED':
+                    return 'status-failed';
+                default:
+                    return '';
+            }
+        }
+
+        function getStatusText(status) {
+            const statusMap = {
+                'UPLOADED': 'Waiting to start',
+                'UPLOADING': 'Uploading',
+                'PROCESSING': 'Processing',
+                'COMPLETED': 'Ready',
+                'FAILED': 'Failed'
+            };
+            return statusMap[status] || status;
+        }
+
+        function getActionButtons(status, id, fileId) {
+            if (status === 'COMPLETED') {
+                return `
+                    <button class="queue-action view-btn" data-id="${id}">
+                        <i class="fas fa-eye"></i>
+                        View
+                    </button>
+                    <button class="queue-action download-btn" data-id="${fileId}">
+                        <i class="fas fa-download"></i>
+                        Download
+                    </button>
+                `;
+            }
+            if (status === 'FAILED') {
+                return `<button class="queue-action retry-btn" data-id="${id}">
+                    <i class="fas fa-redo"></i>
+                    Retry
+                </button>`;
+            }
+            return '';
+        }
+
+        async function pollQueueItemStatus(processingId) {
+            const formattedId = formatProcessingId(processingId);
+            try {
+                const response = await fetch(`/video-bg-remover/status/${formattedId}/`);
+                if (!response.ok) return;
+                
+                const data = await response.json();
+                
+                // Update the specific queue item
+                const index = processingQueue.findIndex(item => item.id === processingId);
+                if (index !== -1) {
+                    processingQueue[index] = { 
+                        ...processingQueue[index], 
+                        ...data,
+                        status: data.status || processingQueue[index].status,
+                        progress: data.progress || processingQueue[index].progress
+                    };
+                    
+                    renderQueueItems();
+                    
+                    // Continue polling if still processing
+                    if (data.status === 'PROCESSING' || data.status === 'UPLOADING') {
+                        setTimeout(() => pollQueueItemStatus(processingId), 5000);
+                    }
+                }
+            } catch (error) {
+                console.error('Error polling status:', error);
+            }
+        }
+
+        queueItemsContainer.addEventListener('click', function(e) {
+            const target = e.target.closest('.queue-action');
+            if (!target) return;
+            
+            const processingId = target.dataset.id;
+            const item = processingQueue.find(item => item.id === processingId || item.result_file_id === processingId);
+            
+            if (target.classList.contains('view-btn')) {
+                viewProcessedVideo(item);
+            } else if (target.classList.contains('download-btn')) {
+                downloadResult(item);
+            } else if (target.classList.contains('retry-btn')) {
+                retryProcessing(item);
+            }
+        });
+
+        function viewProcessedVideo(item) {
+            if (item.view_url) {
+                processedVideo.src = item.view_url;
+                processedVideo.style.display = 'block';
+                inputVideo.style.display = 'none';
+                downloadBtn.style.display = 'block';
+                downloadBtn.onclick = () => {
+                    window.location.href = item.download_url;
+                };
+            } else {
+                console.error('No view URL available for this item');
+            }
+        }
+
+        function downloadResult(item) {
+            if (item.download_url) {
+                window.location.href = item.download_url;
+            } else {
+                console.error('No download URL available for this item');
+            }
+        }
+
+        async function retryProcessing(item) {
+            try {
+                const response = await fetch(`/video-bg-remover/retry/${item.id}/`, {
+                    method: 'POST'
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Retry failed');
+                }
+                
+                await loadProcessingQueue();
+            } catch (error) {
+                showError(error.message);
+            }
+        }
+
+        function formatProcessingId(id) {
+            // If already in UUID format, return as-is
+            if (id.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {
+                return id;
+            }
+            // Convert plain hex to UUID format
+            if (id.length === 32) {
+                return `${id.substr(0, 8)}-${id.substr(8, 4)}-${id.substr(12, 4)}-${id.substr(16, 4)}-${id.substr(20)}`;
+            }
+            return id;
+        }
+
+        function setupEventListeners() {
+            // Drag and drop events
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                dropZone.addEventListener(eventName, preventDefaults, false);
+            });
+            
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropZone.addEventListener(eventName, highlight, false);
+            });
+            
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropZone.addEventListener(eventName, unhighlight, false);
+            });
+            
+            dropZone.addEventListener('drop', handleDrop, false);
+            dropZone.addEventListener('click', () => fileInput.click());
+            
+            // File input
+            fileInput.addEventListener('change', handleFileSelect);
+        }
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        function highlight() {
+            dropZone.classList.add('drag-active');
+        }
+
+        function unhighlight() {
+            dropZone.classList.remove('drag-active');
+        }
+
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            
+            if (files.length) {
+                fileInput.files = files;
+                handleFiles(files);
+            }
+        }
+
+        function handleFileSelect() {
+            if (fileInput.files.length) {
+                handleFiles(fileInput.files);
+            }
+        }
+
+        function handleFiles(files) {
+            const file = files[0];
+            
+            // Validate file
+            if (!file.type.match('video.*')) {
+                showError('Please select a valid video file.');
+                return;
+            }
+            
+            currentFile = file;
+            
+            // Preview video
+            inputVideo.src = URL.createObjectURL(file);
+            inputVideo.style.display = 'block';
+            processedVideo.style.display = 'none';
+            
+            // Enable generate button
+            generateBtn.disabled = false;
+            generateBtn.classList.add('enabled');
+        }
+
+        async function initiateProcessing() {
+            generateBtn.disabled = true;
+            generateBtn.classList.remove('enabled');
+            loader.style.display = 'flex';
+            progressContainer.style.display = 'block';
+            setProgress(0, 'Starting processing...');
+            inputVideo.style.display = 'none';
+
+            try {
+                const formData = new FormData();
+                formData.append('file', currentFile);
+
+                const response = await fetch('/video-bg-remover/upload/', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    if (response.status === 429) {
+                        // Too many concurrent processes
+                        showError(`Too many videos processing. You can only process ${error.max_concurrent} videos at a time. Please wait for current processing to complete.`);
+                    } else {
+                        throw new Error(error.error || 'Processing initiation failed');
+                    }
+                    return;
+                }
+
+                const result = await response.json();
+                
+                // Update active processes count
+                await updateTrials();
+                
+                // Add to processing queue
+                await loadProcessingQueue();
+                
+                // If the new item is processing, start polling
+                const newItem = processingQueue.find(item => item.id === result.processing_id);
+                if (newItem && (newItem.status === 'PROCESSING' || newItem.status === 'UPLOADING')) {
+                    pollQueueItemStatus(newItem.id);
+                }
+
+            } catch (error) {
+                showError(error.message);
+                resetUI();
+            }
+        }
+
+        async function handleCompletion(result) {
+            // Display processed video
+            if (result.file_id) {
+                processedVideo.src = `/video-bg-remover/view/${result.file_id}`;
+                processedVideo.style.display = 'block';
+            }
+            
+            // Set up download button
+            downloadBtn.style.display = 'block';
+            downloadBtn.onclick = () => {
+                window.location.href = `/video-bg-remover/download/${result.file_id}`;
+            };
+            
+            // Update UI
+            setProgress(100, 'Processing complete!');
+            loader.style.display = 'none';
+            
+            // Update trials counter
+            await updateTrials();
+        }
+
+        function resetUI() {
+            generateBtn.disabled = false;
+            generateBtn.classList.add('enabled');
+            loader.style.display = 'none';
+            inputVideo.style.display = 'block';
+            processedVideo.style.display = 'none';
+            downloadBtn.style.display = 'none';
+        }
+
+        function setProgress(percent, message) {
+            progressBar.style.width = percent + '%';
+            progressBar.querySelector('.progress-text').textContent = Math.round(percent) + '%';
+            statusMessage.textContent = message;
+        }
+
+        function showError(message) {
+            const alertPopup = document.getElementById('popupAlert');
+            alertPopup.textContent = message;
+            alertPopup.className = 'alert-popup error show';
+            setTimeout(() => {
+                alertPopup.classList.remove('show');
+            }, 5000);
+        }
+
+        async function getTrials() {
+            const response = await fetch('/video-bg-remover/get_trials_left/');
+            return await response.json();
+        }
+
+        async function updateTrials() {
+            try {
+                const data = await getTrials();
+                if (data.trials_left !== undefined) {
+                    const minutes = (data.trials_left / 60).toFixed(1);
+                    trialsCounter.textContent = `${minutes} Minutes`;
+                    
+                    // Show active processes info
+                    if (data.active_processes !== undefined) {
+                        const activeInfo = document.getElementById('active-processes-info');
+                        if (activeInfo) {
+                            activeInfo.textContent = `${data.active_processes}/${data.max_concurrent} Active`;
+                            activeInfo.style.color = data.active_processes >= data.max_concurrent ? '#f44336' : '#4CAF50';
+                        }
+                    }
+                    
+                    if (data.trials_left <= 0) {
+                        showTrialPopup();
+                    }
+                }
+            } catch (error) {
+                console.error('Failed to update trials:', error);
+            }
+        }
+
+        function showTrialPopup() {
+            trialPopup.style.display = 'flex';
+        }
+
+        function hideTrialPopup() {
+            trialPopup.style.display = 'none';
+        }
+
+        // Close popup when clicking X
+        document.querySelector('.popup-close').addEventListener('click', hideTrialPopup);
+    </script>
+
+  <!-- Language Switcher JS -->
+  <script src="{% static 'home/js/lang-switcher.js' %}"></script>
+
+  <!-- Language Switcher JS -->
+  <script src="{% static 'home/js/lang-switcher.js' %}"></script>
+</body>
+</html>

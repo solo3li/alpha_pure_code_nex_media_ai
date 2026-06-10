@@ -1,0 +1,303 @@
+{% load static %}
+{% load humanize %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Google Tag Manager -->
+  <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+  new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+  'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+  })(window,document,'script','dataLayer','GTM-M3QMV7SP');</script>
+  <!-- End Google Tag Manager -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="{% static 'home/css/home.css' %}">
+    
+    <!-- Material Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css" integrity="sha512-MV7K8+y+gLIBoVD59lQIYicR65iaqukzvf/nwasF0nqhPay5w/9lJmVM2hMDcnK1OnMGCdVK+iQrJ7lzPJQd1w==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+</head>
+<body>
+  <!-- Google Tag Manager (noscript) -->
+  <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-M3QMV7SP"
+  height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+  <!-- End Google Tag Manager (noscript) -->
+  <div class="fixed">
+    <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+  </div>
+
+  <div class="first">
+
+    <div class="sidebar" id="sidebar">
+      <div class="Slideprofile">
+        <img class="profileCircle" src="{{ profile_image_path }}" alt="Profile Image">
+        <span>{{ username }}</span>
+        {% if subscribed %}
+          <img src="{% static 'home/img/on.png' %}" alt="Subscription Active" style="margin-top: 10px; height: 40px;">
+          <p style="margin-bottom: 10px;">Subscribed</p>
+          <p>Valid till</p>
+          <p>{{ end_date }}</p>
+        {% else %}
+          <img src="{% static 'home/img/off.png' %}" alt="Subscription Inactive" style="margin-top: 10px; height: 40px;">
+          <p>Not Subscribed</p>
+        {% endif %}
+      </div>
+
+      {% if subscribed %}
+      {% else %}
+        <a onclick="goTo('container-sub')">Subscribe now</a>
+      {% endif %}
+      <a href="/history">History</a>
+      <a href="/profile">Profile</a>
+      <a onclick="goTo('fourth')" >About Us</a>
+      <a onclick="goTo('fourth')">Contact</a>
+    </div>
+
+    <nav>
+      <div class="logo-img">
+        <img src="{% static 'home/img/logo.png' %}" alt="AI Studio Logo">
+        <span>NEX MEDIA AI</span>
+      </div>
+      <div class="content">
+        <ul>
+          <li class="lione"><a href="/profile">Profile</a></li>
+          <li class="two" id="product-menu">Product 
+            <i class="fa-solid fa-caret-down" id="dropdown-icon"></i>
+            <ul class="dropdown" id="dropdown-menu">
+              <li><a href="/bg-remover/">Remove background from image</a></li>
+              <li><a href="/video-caption/">Video caption and translation</a></li>
+              <li><a href="/voice-to-text/">Convert voice to text</a></li>
+              <li><a href="/img-to-text/">Convert image to text</a></li>
+              <li><a href=" /text-to-cartoon/">Drawing cartoon character</a></li>
+              <li><a href=" /text-to-voice/">Convert text to speech</a></li>
+              <li><a href="/video-bg-remover/">Remove background from video</a></li>
+              <li><a href="/make-my-trip/">Make My Trip</a></li>
+              <li><a href=" /GPT/">Chat gpt</a></li>
+            </ul>
+          </li>
+          <li onclick="goTo('fourth')" class="three">Help</li>
+          <li class="history"><a href="/history">History</a></li>
+              {% if subscribed %}
+        <li class="four">Subscribed <img src="/static/home/img/on.png" alt="Subscription Active" style=" height: 25px;"></li>
+    {% else %}
+        <li onclick="goTo('container-sub')" class="four">Upgrade Plan <span class="material-symbols-outlined">bolt</span></li>
+    {% endif %}
+        </ul>
+      </div>
+      <div class="profile">
+        <span>{{ username }}</span>
+        <img src="{{ profile_image_path }}" alt="Profile Image">
+      </div>
+    </nav>
+
+    <div class="middle-home">
+      <div class="info">
+          <span>NEX MEDIA AI</span>
+          <p>AI-powered creativity, made easy</p>
+          <div class="imgs-home mobile">
+            <img class="circle" src="{% static 'home/img/home11.gif' %}" alt="">
+            <img class="robot" src="{% static 'home/img/robot.png' %}" alt="">
+          </div>
+
+          <button onClick="goTo('second')" id="try" class="try">try for free</button>
+      </div>
+      <div class="imgs-home desktop">
+        <img class="circle" src="{% static 'home/img/home11.gif' %}" alt="">
+        <img class="robot" src="{% static 'home/img/robot.png' %}" alt="">
+      </div>
+    </div>
+  </div>
+
+  <div id="second" class="second">
+    <h1 style="color: #E6E6E6;margin-left: 140px; margin-top: 20px;"> Product</h1>
+    <div class="grid-container">
+      <a href="/bg-remover/"  class="grid-item">
+        <img src="{% static 'home/img/removeImg.png' %}" alt=""><br>
+        <span>Remove background from image</span>
+      </a>
+      <a href="/voice-to-text/" class="grid-item">
+        <img src="{% static 'home/img/convertTxt.png' %}" alt=""><br>
+        <span>Convert voice to text</span>
+      </a>
+      <a href="/make-my-trip/"  class="grid-item">
+        <img src="{% static 'home/img/unnamed.png' %}" alt=""><br>
+        <span>Make My Trip</span>
+      </a>
+      <a href="/video-caption/" class="grid-item">
+        <img src="{% static 'home/img/videoCaption.jpeg' %}" alt=""><br>
+        <span>Video caption and translation</span>
+      </a>
+      <a href="/video-bg-remover/"  class="grid-item">
+        <img src="{% static 'home/img/removeImg.png' %}" alt=""><br>
+        <span>Remove background from video</span>
+      </a>
+      <a href="/text-to-voice/"  class="grid-item">
+        <img src="{% static 'home/img/convertSpeech.png' %}" alt=""><br>
+        <span>Convert text to speech</span>
+      </a>
+      <a href="/img-to-text/"  class="grid-item">
+        <img src="{% static 'home/img/img-to-txt.jpeg' %}" alt=""><br>
+        <span>Convert image to text</span>
+      </a>
+      <a href="/text-to-cartoon/"   class="grid-item">
+        <img src="{% static 'home/img/Cartoon.jpeg' %}" alt=""><br>
+        <span>Drawing cartoon character</span>
+      </a>
+      <a href="/GPT/"  class="grid-item">
+        <img src="{% static 'home/img/chatGPT.jpg' %}" alt=""><br>
+        <span>Chat gpt</span>
+      </a>
+    </div>
+  </div>
+
+  <div id="container-sub" class="container-sub">
+    <div id="third" class="third">
+      <div class="console">
+        <div class="btn-box">
+          <div id="btns"></div>
+          <button id="month" type="button" class="toggle-btn active" data-value="month">Month</button>
+          <button type="button" id="year" class="toggle-btn" data-value="year">Year</button>
+        </div>
+        <div class="toggle-container">
+          <div class="currency-toggle">
+            <button id="currency-btn" class="toggle-btn">Switch to EGP</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="offers">
+        <div class="offer-one">
+          <div class="off-list">
+            <div class="recommand">
+              <i class="fa-solid fa-star"></i>
+              <span>Recommended</span>
+              <i class="fa-solid fa-star"></i>
+            </div>
+
+            <div class="offer-info-one">
+              <div class="offer-left">
+                <h1>Life time</h1>
+                <p style="color: #8f36ff">Unlimited possibilities</p>
+              </div>
+
+              <div class="offer-right">
+                <h1 id="price1"></h1>
+                <p id="duration1">Monthly</p>
+              </div>
+            </div>
+          </div>
+
+          <div id="first-plan" class="offer-info-two"></div>
+        </div>
+
+        <div class="offer-two">
+          <div class="offer-info-one">
+            <div class="offer-left">
+              <h1>Basic plan</h1>
+              <p style="color: #8f36ff">For bigger teams</p>
+            </div>
+
+            <div class="offer-right">
+              <h1 id="price2"></h1>
+              <p id="duration2">Monthly</p>
+            </div>
+          </div>
+
+          <div id="second-plan" class="offer-info-two"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+    <div id="fourth" class="fourth">
+      <div class="fourthCenter">
+        <div class="first-side">
+
+          <div class="paragraph">
+              <h1>Connect US</h1>
+              <p>"For any questions or assistance you need, <br> please don't hesitate to 
+                  contact our support team directly at They'll be happy to help!"</p>
+          </div>
+  
+          <div class="contacts">
+
+            <div class="phone">
+              <i class="fa-solid fa-envelope-open"></i>
+              <h1>Email</h1>
+            
+              <p>ainex103@gmail.com</p>
+          </div>
+
+
+          <div class="phone">
+            <a href="https://t.me/neaxai" target="_blank">
+              <i class="fa-brands fa-telegram"></i>
+            </a>
+            <h1>Telegram</h1>
+           
+            <p>@neaxai</p>
+          </div>
+          <div class="phone">
+             
+              <i class="fa-solid fa-location-dot"></i>
+            </a>
+            <h1>Location</h1>
+           
+            <p>Cairo, Egypt</p>
+          </div>
+          <div class="phone">
+            
+              <i class="fa-solid fa-phone"></i>
+            </a>
+            <h1>Phone</h1>
+           
+            <p>+20 1553593868</p>
+          </div>
+
+              
+  
+          </div>
+
+              
+          <div class="icons">
+              <i class="fa-brands fa-facebook-f"></i>
+              <i class="fa-brands fa-twitter"></i>
+              <i class="fa-brands fa-instagram"></i>
+              <i class="fa-brands fa-linkedin"></i>
+          </div>
+
+      </div>
+
+
+      <div class="second-side">
+          <div class="form-container">
+              <form action="#">
+                  <div class="input-group">
+                      <label for="email">Email</label>
+                      <input type="email" id="email" name="email" placeholder="Email">
+                  </div>
+                  <div class="input-group">
+                      <label for="message">Message</label>
+                      <textarea id="message" name="message" placeholder="Your message..."></textarea>
+                  </div>
+                  <button class="submit-btn" type="submit">Send</button>
+              </form>
+          </div>
+      </div>
+
+
+    </div>
+    <section class="ft-legal">
+      <ul class="ft-legal-list">
+        <li><a href="/terms">Terms &amp; Conditions</a></li>
+        <li><a href="/terms">Privacy Policy</a></li>
+        <li>&copy; 2025 Copyright NEXMEDIA Inc.</li>
+      </ul>
+    </section>
+
+  <script src="{% static 'home/js/script.js' %}"></script> 
+</body>
+</html>

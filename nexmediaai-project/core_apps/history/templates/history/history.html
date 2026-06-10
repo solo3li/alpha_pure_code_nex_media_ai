@@ -1,0 +1,104 @@
+{% load static %}
+{% load i18n %}
+{% get_current_language as CURRENT_LANG %}
+<!DOCTYPE html>
+<html lang="{{ CURRENT_LANG }}" dir="{% if CURRENT_LANG == 'ar' %}rtl{% else %}ltr{% endif %}">
+<head>
+  <!-- Google Tag Manager -->
+  <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+  new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+  'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+  })(window,document,'script','dataLayer','GTM-M3QMV7SP');</script>
+  <!-- End Google Tag Manager -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% trans "User Tool History" %} - NEX MEDIA AI</title>
+    <link rel="stylesheet" href="{% static 'history/history.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css">
+    {% if CURRENT_LANG == 'ar' %}
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&family=Tajawal:wght@300;400;500;700&display=swap">
+    {% endif %}
+</head>
+<body>
+  <!-- Google Tag Manager (noscript) -->
+  <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-M3QMV7SP"
+  height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+  <!-- End Google Tag Manager (noscript) -->
+  
+    <div class="background-overlay"></div>
+    
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-left">
+                <i class="fas fa-history nav-icon"></i>
+                <span class="nav-title">{% trans "User Tool History" %}</span>
+            </div>
+            
+            <button type="button" class="upgrade-btn" onclick="window.location.href='/#container-sub'">
+                <i class="fas fa-bolt"></i>
+                <span>{% trans "Upgrade" %}</span>
+            </button>
+        </div>
+    </nav>
+    
+    <div class="main-content">
+        <div class="page-header">
+            <h1>{% trans "History" %}</h1>
+            <p>{% trans "Access the history of each tool below" %}</p>
+        </div>
+        
+        <div class="tools-grid">
+            {% with tool_labels=tool_labels %}
+                {% for tool_name in tools %}
+                    <div class="tool-card">
+                        <div class="tool-icon">
+                            {% if tool_name == 'bg-remover' %}
+                                <i class="fas fa-image"></i>
+                            {% elif tool_name == 'text-to-cartoon' %}
+                                <i class="fas fa-palette"></i>
+                            {% elif tool_name == 'img-to-txt' %}
+                                <i class="fas fa-file-text"></i>
+                            {% elif tool_name == 'voice-to-text' %}
+                                <i class="fas fa-microphone"></i>
+                            {% elif tool_name == 'video-caption' %}
+                                <i class="fas fa-video"></i>
+                            {% elif tool_name == 'text-to-voice' %}
+                                <i class="fas fa-volume-up"></i>
+                            {% elif tool_name == 'video-bg-remover' %}
+                                <i class="fas fa-film"></i>
+                            {% elif tool_name == 'make-my-trip' %}
+                                <i class="fas fa-plane"></i>
+                            {% elif tool_name == 'GPT' %}
+                                <i class="fas fa-robot"></i>
+                            {% else %}
+                                <i class="fas fa-cog"></i>
+                            {% endif %}
+                        </div>
+                        <div class="tool-content">
+                            <h3>
+                                {% if tool_name == 'bg-remover' %}
+                                    {% trans "Image Background Remover" %}
+                                {% elif tool_name == 'text-to-cartoon' %}
+                                    {% trans "Text to Cartoon" %}
+                                {% elif tool_name == 'img-to-txt' %}
+                                    {% trans "Describe Image" %}
+                                {% elif tool_name == 'voice-to-text' %}
+                                    {% trans "Voice to Text" %}
+                                {% else %}
+                                    {{ tool_name|title }}
+                                {% endif %}
+                            </h3>
+                            <p>{% trans "View your processing history" %}</p>
+                        </div>
+                        <a href="{% url 'history:history_by_tool' tool_name %}" class="tool-link">
+                            <span>{% trans "View History" %}</span>
+                            <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                {% endfor %}
+            {% endwith %}
+        </div>
+    </div>
+</body>
+</html>

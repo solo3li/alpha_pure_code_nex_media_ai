@@ -1,0 +1,30 @@
+Flask>=2.0
+Flask-CORS>=3.0
+requests # For Django to call Flask, not strictly for Flask service itself but good to list if co-deployed for testing
+gunicorn # For production deployment
+requests==2.26.0
+# Video/Audio/Text Processing
+opencv-python-headless # For video duration/validation (headless is smaller)
+moviepy>=1.0.3
+Pillow>=9.0.0 # For image manipulation with captions
+pysrt>=1.1.2
+arabic-reshaper==2.1.0
+
+python-bidi>=0.4.2
+# Whisper (OpenAI's Speech-to-Text)
+# For CPU:
+openai-whisper>=20230314 # Or later versions
+# For GPU (if you have CUDA setup in Docker and compatible hardware):
+# openai-whisper[gpu]>=20230314 # Or specific CUDA version if needed
+# Note: Whisper also pulls in torch, torchaudio, torchvision.
+# numpy is a dependency of many of these.
+PyJWT==2.4.0
+deep-translator>=1.9.0
+pydub>=0.25.0 # For mediainfo to get duration
+numpy==1.23.5
+# Other utilities
+werkzeug>=2.0 # Usually a Flask dependency
+
+# Ensure ffmpeg is installed in the Docker container / environment separately.
+# Whisper also requires ffmpeg for audio conversion.
+moviepy==1.0.3

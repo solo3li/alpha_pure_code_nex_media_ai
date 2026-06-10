@@ -1,0 +1,7 @@
+Welcome to {{ site_name }}!
+
+Please confirm your email address by clicking the following link:
+{{ activate_url }}
+
+Thank you,
+{{ site_name }} Team

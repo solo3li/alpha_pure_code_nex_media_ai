@@ -1,0 +1,64 @@
+{% extends "account/base.html" %}
+
+{% block title %}Confirm Email - NexMediaAI{% endblock %}
+
+{% block header_subtitle %}Email Confirmation{% endblock %}
+
+{% block content %}
+<div class="text-center mb-4">
+    <i class="fas fa-envelope-open-text fa-4x text-primary mb-3"></i>
+    <h2>Confirm Your Email Address</h2>
+</div>
+
+{% if confirmation %}
+    {% if confirmation.email_address.verified %}
+        <div class="alert alert-success">
+            <i class="fas fa-check-circle me-2"></i>
+            <strong>Email Already Confirmed!</strong> Your email address has already been verified.
+        </div>
+        <div class="text-center">
+            <a href="/home" class="btn btn-primary btn-lg">
+                <i class="fas fa-home me-2"></i>Continue to Dashboard
+            </a>
+        </div>
+    {% else %}
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i>
+            Please confirm that <strong>{{ confirmation.email_address.email }}</strong> is your email address.
+        </div>
+        
+        <form method="post" action="{% url 'account_confirm_email' confirmation.key %}">
+            {% csrf_token %}
+            <div class="text-center">
+                <button type="submit" class="btn btn-primary btn-lg">
+                    <i class="fas fa-check me-2"></i>Confirm Email Address
+                </button>
+            </div>
+        </form>
+    {% endif %}
+{% else %}
+    <div class="alert alert-danger">
+        <i class="fas fa-exclamation-triangle me-2"></i>
+        <strong>Invalid Confirmation Link</strong>
+        <p class="mb-2">This email confirmation link has expired or is invalid.</p>
+        <p class="mb-0">Please request a new email confirmation.</p>
+    </div>
+    
+    <div class="text-center mt-4">
+        <p>If you need help, please contact our support team.</p>
+        <a href="/login" class="btn btn-secondary me-2">
+            <i class="fas fa-sign-in-alt me-2"></i>Back to Login
+        </a>
+        <a href="/register" class="btn btn-primary">
+            <i class="fas fa-user-plus me-2"></i>Create New Account
+        </a>
+    </div>
+{% endif %}
+
+<div class="mt-4 text-center">
+    <small class="text-muted">
+        <i class="fas fa-shield-alt me-1"></i>
+        This verification helps keep your account secure.
+    </small>
+</div>
+{% endblock %}

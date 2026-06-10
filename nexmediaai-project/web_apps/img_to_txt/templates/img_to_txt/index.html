@@ -1,0 +1,369 @@
+{% load i18n %}
+{% get_current_language as CURRENT_LANG %}
+<!DOCTYPE html>
+<html lang="{{ CURRENT_LANG }}" dir="{% if CURRENT_LANG == 'ar' %}rtl{% else %}ltr{% endif %}">
+<head>
+  <!-- Google Tag Manager -->
+  <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+  new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+  'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+  })(window,document,'script','dataLayer','GTM-M3QMV7SP');</script>
+  <!-- End Google Tag Manager -->
+  
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NEX MEDIA AI - Image to Text</title>
+  
+  <!-- Fonts and Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css" integrity="sha512-MV7K8+y+gLIBoVD59lQIYicR65iaqukzvf/nwasF0nqhPay5w/9lJmVM2hMDcnK1OnMGCdVK+iQrJ7lzPJQd1w==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link rel="stylesheet" href="/static/img_to_txt/style.css">
+  <link rel="icon" type="image/x-icon" href="/static/icons/img-to-txt.ico">
+  
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+  <!-- Language Switcher CSS -->
+  <link rel="stylesheet" href="{% static 'home/css/lang-switcher.css' %}">
+  {% if CURRENT_LANG == 'ar' %}
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&family=Tajawal:wght@300;400;500;700&display=swap">
+  {% endif %}
+</head>
+<body>
+  <!-- Google Tag Manager (noscript) -->
+  <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-M3QMV7SP"
+  height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+  <!-- End Google Tag Manager (noscript) -->
+
+  {% csrf_token %}
+
+  <!-- Mobile Menu Button -->
+
+
+  <!-- Sidebar -->
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="slide-profile">
+        <img class="profile-circle" src="https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=150" alt="Profile Image">
+        <span class="username">John Doe</span>
+        <div class="subscription-status">
+          <div class="status-badge inactive">
+            <i class="fas fa-times-circle"></i>
+            <span>Free Plan</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sidebar-nav">
+      <a href="/" class="nav-link">
+        <i class="fas fa-home"></i>
+        Home
+      </a>
+      <a href="/history" class="nav-link">
+        <i class="fas fa-history"></i>
+        History
+      </a>
+      <a href="/profile" class="nav-link">
+        <i class="fas fa-user"></i>
+        Profile
+      </a>
+      <a onclick="goTo('container-sub')" class="nav-link upgrade">
+        <i class="fas fa-rocket"></i>
+        Subscribe Now
+      </a>
+    </div>
+  </div>
+
+  <!-- Navigation -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <div class="logo">
+        <div class="logo-icon">
+          <i class="fas fa-file-text"></i>
+        </div>
+        <span>Image to Text</span>
+      </div>
+      
+      <div class="nav-menu">
+        <div class="nav-item">
+          <a href="/">
+            <i class="fas fa-arrow-left"></i>
+            Back to Home
+          </a>
+        </div>
+      </div>
+
+      <div class="profile-section">
+        {% include "partials/language_switcher.html" %}
+        <div class="trial-counter">
+          <span class="trial-label">Free Trials</span>
+          <span class="trial-count">{{ number_of_trials }}</span>
+        </div>
+       <button class="upgrade-btn" onclick="window.location.href='/#container-sub'">
+          <i class="fas fa-bolt"></i>
+          Upgrade
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <!-- Hero Section -->
+    <div class="hero-section">
+      <div class="container">
+        <div class="hero-content">
+          <h1 class="hero-title">Convert Image to Text</h1>
+          <p class="hero-subtitle">Effortlessly convert your image to text and describe it with AI.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tool Section -->
+    <div class="tool-section">
+      <div class="container">
+        <div class="tool-grid">
+          <!-- Text Output Area -->
+          <div class="text-output-area">
+            <div class="output-container">
+              <div class="output-header">
+                <h3>{% trans "Generated Description" %}</h3>
+              </div>
+              <div class="output-content" id="caption-container">
+                <div class="placeholder-text">
+                  <i class="fas fa-file-text"></i>
+                  <p>Describe an image you want to generate...</p>
+                </div>
+              </div>
+              <div class="loading-container" id="loads" style="display: none;">
+                <div class="loader" id="loadings"></div>
+                <p>Analyzing your image...</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Upload Controls -->
+          <div class="upload-controls">
+            <div class="upload-card">
+              <div class="upload-header">
+                <h2>Upload Image</h2>
+              </div>
+              
+              <input type="file" id="image-upload" accept="image/*">
+              <label for="image-upload" class="file-upload-area">
+                <div class="upload-icon">
+                  <i class="fas fa-cloud-upload-alt"></i>
+                </div>
+                <div class="upload-text">
+                  <span class="upload-title">Select Image</span>
+                  <p class="upload-description">Choose an image file to analyze and describe.</p>
+                </div>
+              </label>
+
+              <button id="upload-btn" class="primary-btn">
+                <span>Upload Image</span>
+                <i class="fas fa-upload"></i>
+              </button>
+
+              <div id="image-container" class="image-preview"></div>
+
+              <button id="generate-btn" class="secondary-btn" style="display: none;">
+                <span>{% trans "Generate Caption" %}</span>
+                <i class="fas fa-magic"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Trial Popup -->
+  <div id="trialPopup" class="popup-overlay" style="display: none;">
+    <div class="popup-content">
+      <span class="popup-close">&times;</span>
+      <div class="popup-icon">
+        <i class="fas fa-exclamation-triangle"></i>
+      </div>
+      <h2>Your Free Trials Are Over</h2>
+      <p>You've used all your free trial attempts. Subscribe now to continue using this tool.</p>
+      <button id="subscribeButton" class="popup-btn">
+        <i class="fas fa-crown"></i>
+        Subscribe Now
+      </button>
+    </div>
+  </div>
+
+  <!-- Error Popup -->
+  <div id="errorPopup" class="error-notification" style="display: none;">
+    <div class="error-content">
+      <i class="fas fa-exclamation-circle"></i>
+      <span class="error-message"></span>
+    </div>
+  </div>
+
+  <script>
+    // Toggle sidebar function
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      sidebar.classList.toggle('active');
+    }
+
+    // CSRF token for Django AJAX requests
+    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]')?.value;
+    
+    function showPopup(message) {
+      const popup = $('#errorPopup');
+      popup.find('.error-message').text(message);
+      popup.fadeIn();
+      setTimeout(function () {
+        popup.fadeOut();
+      }, 5000);
+    }
+
+    document.getElementById('upload-btn').addEventListener('click', function() {
+      const input = document.getElementById('image-upload');
+      const file = input.files[0];
+      if (!file) {
+        showPopup("Please select a file first");
+        return;
+      }
+    
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      // Add CSRF token for Django
+      const options = {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'X-CSRFToken': csrftoken
+        }
+      };
+    
+      fetch("{% url 'upload_file' %}", options)
+      .then(response => response.json())
+      .then(data => {
+        if (data.error) {
+          showPopup(data.error);
+        } else {
+          if (data.show === 'No-sub-no-Trial'){
+            console.log('no trial no sub')
+            console.log(data)
+            $('#trialPopup').fadeIn();
+            return;
+          } else if (data.show === 'No-sub-free-Trial'){
+            console.log('free trial no sub')
+            console.log(data.trials);
+            console.log(data)
+            updateTrialCount()
+          }
+
+          const imageContainer = document.getElementById('image-container');
+          imageContainer.innerHTML = '';
+          const img = document.createElement('img');
+          img.src = data.file_path.startsWith('/media/') ? data.file_path : `/media/${data.file_path}`;
+          img.style.maxWidth = '100%';
+          img.style.maxHeight = '150px';
+          img.style.borderRadius = '12px';
+          imageContainer.appendChild(img);
+          
+          // Show generate button
+          document.getElementById('generate-btn').style.display = 'flex';
+        }
+      })
+      .catch(error => console.error('Error:', error));
+    });
+            
+    document.getElementById('generate-btn').addEventListener('click', function() {
+      const img = document.querySelector('#image-container img');
+      if (!img) {
+        showPopup("No image uploaded yet");
+        return;
+      }
+    
+      document.getElementById('loads').style.display = 'flex';
+      document.getElementById('caption-container').style.display = 'none';
+      
+      // Extract filename from the path
+      const filePath = img.src.split('/').pop();
+      
+      fetch("{% url 'generate_caption' %}", {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': csrftoken
+        },
+        body: JSON.stringify({ file_path: filePath }),
+      })
+      .then(response => response.json())
+      .then(data => {
+        document.getElementById('loads').style.display = 'none';
+      
+        if (data.error) {
+          showPopup(data.error);
+        } else {
+          const captionContainer = document.getElementById('caption-container');
+          captionContainer.innerHTML = `
+            <div class="generated-text">
+              <i class="fas fa-check-circle"></i>
+              <p>${data.caption}</p>
+            </div>
+          `;
+          captionContainer.style.display = 'block';
+          updateTrialCount()
+        }
+      })
+      .catch(error => {
+        document.getElementById('loads').style.display = 'none';
+        showPopup("An error occurred while generating the caption");
+      });
+    });
+
+    function updateTrialCount() {
+      $.ajax({
+        url: "{% url 'get_trials_left' %}",
+        type: 'GET',
+        headers: {
+          'X-CSRFToken': csrftoken
+        },
+        success: function(data) {
+          console.log('data.trials_left')
+          console.log(data.trials_left)
+          if (data.trials_left !== undefined) {
+            $('.trial-count').text(data.trials_left);
+            if(data.trials_left === 0)  {
+              $('#trialPopup').fadeIn();
+            }
+          } else {
+            console.error('Error: Invalid response for trials left');
+          }
+        },
+        error: function() {
+          console.error('Failed to fetch the updated trial count');
+        }
+      });
+    }
+
+    $(document).on('click', '.popup-close', function() {
+      $('#trialPopup').fadeOut();
+    });
+
+    $('#subscribeButton').on('click', function() {
+      window.location.href = 'https://www.nexmediaai.com/home#third';
+    });
+
+    // Initialize CSRF token for AJAX
+    $.ajaxSetup({
+      beforeSend: function(xhr, settings) {
+        if (!(/^(GET|HEAD|OPTIONS|TRACE)$/.test(settings.type)) && !this.crossDomain) {
+          xhr.setRequestHeader("X-CSRFToken", csrftoken);
+        }
+      }
+    });
+  </script>
+
+  <!-- Language Switcher JS -->
+  <script src="{% static 'home/js/lang-switcher.js' %}"></script>
+</body>
+</html>

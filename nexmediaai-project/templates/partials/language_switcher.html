@@ -1,0 +1,38 @@
+{% load i18n %}
+{# ── Language Switcher Partial ───────────────────────────────── #}
+{# Include this anywhere inside a <nav> or toolbar. #}
+    {# Requires: {% load i18n %} in the parent template too. #}
+
+    <div class="lang-switcher">
+        <button class="lang-btn" title="{% trans 'Switch Language' %}" aria-label="{% trans 'Switch Language' %}">
+            <span class="lang-globe"><i class="fas fa-globe"></i></span>
+            <span class="lang-current">
+                {% get_current_language as LANGUAGE_CODE %}
+                {% if LANGUAGE_CODE == 'ar' %}AR{% else %}EN{% endif %}
+            </span>
+            <i class="fas fa-chevron-down lang-arrow"></i>
+        </button>
+
+        <div class="lang-dropdown" role="listbox">
+            <form method="post" action="{% url 'set_language' %}">
+                {% csrf_token %}
+                <input type="hidden" name="language" value="en">
+                <input type="hidden" name="next" value="{{ request.path }}">
+                <button type="submit" class="lang-option {% if LANGUAGE_CODE != 'ar' %}active{% endif %}" role="option">
+                    <span class="lang-flag">🇬🇧</span>
+                    <span>{% trans "English" %}</span>
+                    {% if LANGUAGE_CODE != 'ar' %}<i class="fas fa-check lang-check"></i>{% endif %}
+                </button>
+            </form>
+            <form method="post" action="{% url 'set_language' %}">
+                {% csrf_token %}
+                <input type="hidden" name="language" value="ar">
+                <input type="hidden" name="next" value="{{ request.path }}">
+                <button type="submit" class="lang-option {% if LANGUAGE_CODE == 'ar' %}active{% endif %}" role="option">
+                    <span class="lang-flag">🇪🇬</span>
+                    <span>العربية</span>
+                    {% if LANGUAGE_CODE == 'ar' %}<i class="fas fa-check lang-check"></i>{% endif %}
+                </button>
+            </form>
+        </div>
+    </div>

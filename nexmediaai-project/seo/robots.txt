@@ -1,0 +1,32 @@
+User-agent: *
+Allow: /
+
+# Disallow admin and API endpoints
+Disallow: /admin/
+Disallow: /api/
+Disallow: /media/
+Disallow: /staticfiles/
+Disallow: /logs/
+Disallow: /venv/
+Disallow: /backups/
+
+# Allow main pages and tools
+Allow: /home/
+Allow: /bg-remover/
+Allow: /video-bg-remover/
+Allow: /video-caption/
+Allow: /img-to-text/
+Allow: /voice-to-text/
+Allow: /text-to-cartoon/
+Allow: /GPT/
+Allow: /text-to-voice/
+Allow: /make-my-trip/
+Allow: /terms/
+Allow: /history/
+
+# Sitemap location
+Sitemap: https://nexmediaai.com/sitemap.xml
+
+# Crawl delay (optional - be respectful to server)
+Crawl-delay: 1
+

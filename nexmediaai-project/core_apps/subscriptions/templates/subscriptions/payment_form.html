@@ -1,0 +1,582 @@
+{% load static %}
+{% load i18n %}
+{% get_current_language as CURRENT_LANG %}
+<!DOCTYPE html>
+<html lang="{{ CURRENT_LANG }}" dir="{% if CURRENT_LANG == 'ar' %}rtl{% else %}ltr{% endif %}">
+<head>
+  <!-- Google Tag Manager -->
+  <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+  new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+  'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+  })(window,document,'script','dataLayer','GTM-M3QMV7SP');</script>
+  <!-- End Google Tag Manager -->
+  <meta charset="UTF-8">
+  <title>{% trans "Payment" %} - Nex Media AI</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="csrf-token" content="{{ csrf_token }}">
+
+  <link href="https://fonts.googleapis.com/css?family=Raleway|Rock+Salt|Source+Code+Pro:300,400,600" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'subscriptions/css/styles.css' %}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+  <style>
+    /* Modern Payment Form Styles */
+    .payment-container {
+      max-width: 500px;
+      margin: 0 auto;
+      padding: 20px;
+      background: #fff;
+      border-radius: 15px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    .payment-header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .payment-header h1 {
+      color: #333;
+      font-size: 28px;
+      margin-bottom: 10px;
+    }
+
+    .plan-info {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 30px;
+      text-align: center;
+    }
+
+    .plan-name {
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    .plan-price {
+      font-size: 36px;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+
+    .plan-duration {
+      font-size: 16px;
+      opacity: 0.9;
+    }
+
+    .payment-methods {
+      margin-bottom: 30px;
+    }
+
+    .payment-method {
+      margin-bottom: 20px;
+      padding: 15px;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .payment-method:hover {
+      border-color: #667eea;
+      background: #f8f9ff;
+    }
+
+    .payment-method.active {
+      border-color: #667eea;
+      background: #f0f4ff;
+    }
+
+    .payment-method-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+
+    .payment-method-title {
+      font-weight: bold;
+      color: #333;
+    }
+
+    .payment-method-icon {
+      font-size: 24px;
+      color: #667eea;
+    }
+
+    .payment-method-description {
+      color: #666;
+      font-size: 14px;
+    }
+
+    /* PayPal and Paymob Buttons */
+    .paypal-button, .paymob-button {
+      width: 100%;
+      padding: 15px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 15px;
+    }
+
+    .paypal-button {
+      background: linear-gradient(135deg, #0070ba 0%, #005ea6 100%);
+    }
+
+    .paypal-button:hover, .paymob-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    .paypal-button:disabled, .paymob-button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* Message Styles */
+    .message {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: white;
+      padding: 15px 25px;
+      border-radius: 25px;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+      animation: slideUp 0.3s ease-out;
+      font-weight: 500;
+      max-width: 400px;
+      text-align: center;
+    }
+
+    .message.processing {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .message.success {
+      background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+    }
+
+    .message.error {
+      background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+    }
+
+    .message.compliance {
+      background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+    }
+
+    .spinner {
+      width: 20px;
+      height: 20px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 1s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes slideUp {
+      from {
+        transform: translate(-50%, 100%);
+        opacity: 0;
+      }
+      to {
+        transform: translate(-50%, 0);
+        opacity: 1;
+      }
+    }
+
+    /* Error Popup */
+    .error-popup {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      backdrop-filter: blur(5px);
+    }
+
+    .error-popup-content {
+      background: white;
+      padding: 30px;
+      border-radius: 15px;
+      text-align: center;
+      width: 350px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .error-popup h2 {
+      color: #ff6b6b;
+      margin-bottom: 15px;
+    }
+
+    .error-popup p {
+      color: #666;
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+
+    .error-popup-close {
+      padding: 12px 24px;
+      background: #ff6b6b;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+
+    .error-popup-close:hover {
+      background: #e55a5a;
+      transform: translateY(-1px);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .payment-container {
+        margin: 10px;
+        padding: 15px;
+      }
+      
+      .payment-header h1 {
+        font-size: 24px;
+      }
+      
+      .plan-price {
+        font-size: 28px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Google Tag Manager (noscript) -->
+  <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-M3QMV7SP"
+  height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+  <!-- End Google Tag Manager (noscript) -->
+
+  <div class="payment-container">
+    <!-- Header -->
+    <div class="payment-header">
+      <a href="/home" style="position: absolute; left: 20px; top: 20px; color: #667eea; font-size: 20px;">
+        <i class="fa fa-arrow-left"></i>
+      </a>
+      <img src="{% static 'subscriptions/img/logo.png' %}" alt="Nex Media AI" style="max-width: 200px; margin-bottom: 20px;">
+      <h1>{% trans "Complete Your Subscription" %}</h1>
+    </div>
+
+    <!-- Plan Information -->
+    <div class="plan-info">
+      <div class="plan-name">{{ plan.type }}</div>
+      <div class="plan-price">{{ currency_symbol }}{% if currency_symbol == '$' %}{{ plan.amount }}{% else %}{{ plan.amount_egp }}{% endif %}</div>
+      <div class="plan-duration">{{ plan.duration }}</div>
+    </div>
+
+    <!-- Payment Methods -->
+    <div class="payment-methods">
+      <!-- PayPal Payment Method -->
+      <div class="payment-method active" id="paypal-method">
+        <div class="payment-method-header">
+          <div class="payment-method-title">PayPal</div>
+          <div class="payment-method-icon">
+            <i class="fab fa-paypal"></i>
+          </div>
+        </div>
+        <div class="payment-method-description">
+          {% trans "Pay securely with PayPal. Accepts all major credit cards and PayPal balance." %}
+        </div>
+        <div id="paypal-button-container"></div>
+      </div>
+
+      <!-- Paymob Payment Method -->
+      <div class="payment-method" id="paymob-method">
+        <div class="payment-method-header">
+          <div class="payment-method-title">Pay in EGP</div>
+          <div class="payment-method-icon">
+            <i class="fa fa-credit-card"></i>
+          </div>
+        </div>
+        <div class="payment-method-description">
+          Pay in Egyptian Pounds using local payment methods.
+        </div>
+        <button class="paymob-button" id="paymob-button">
+          <img src="{% static 'subscriptions/img/paymob.png' %}" alt="Paymob" style="height: 20px;">
+          <span>{% trans "Pay with Paymob" %}</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Error Popup -->
+ 
+
+  <!-- Scripts -->
+  <script src="https://www.paypal.com/sdk/js?client-id={{ PAYPAL_CLIENT_ID }}&currency=USD&components=buttons&enable-funding=venmo,paylater,card"></script>
+  
+  <script>
+    // Configuration
+    const planName = "{{ plan.name }}";
+    const csrfToken = "{{ csrf_token }}";
+    
+    // Error filtering function
+    function shouldShowError(error) {
+        const suppressedErrors = [
+            "Refused to load the script 'blob:https://www.paypal.com/",
+            "because it violates the following Content Security Policy directive",
+            "script-src-elem",
+            "Content Security Policy"
+        ];
+        
+        return !suppressedErrors.some(suppressed => error.includes(suppressed));
+    }
+    
+    // Message management
+    function showMessage(type, text, duration = 5000) {
+      hideAllMessages();
+      
+      const messageDiv = document.createElement('div');
+      messageDiv.className = `message ${type}`;
+      
+      let icon = '';
+      switch(type) {
+        case 'processing':
+          icon = '<div class="spinner"></div>';
+          break;
+        case 'success':
+          icon = '<i class="fa fa-check-circle"></i>';
+          break;
+        case 'error':
+          icon = '<i class="fa fa-exclamation-circle"></i>';
+          break;
+        case 'compliance':
+          icon = '<i class="fa fa-exclamation-triangle"></i>';
+          break;
+      }
+      
+      messageDiv.innerHTML = `${icon}<span>${text}</span>`;
+      document.body.appendChild(messageDiv);
+      
+      if (duration > 0) {
+        setTimeout(() => {
+          if (messageDiv.parentNode) {
+            messageDiv.remove();
+          }
+        }, duration);
+      }
+    }
+    
+    function hideAllMessages() {
+      const messages = document.querySelectorAll('.message');
+      messages.forEach(msg => msg.remove());
+    }
+    
+    function showError(message) {
+      console.log(message);
+ 
+    }
+    
+    // Global error handler to catch console errors
+    const originalConsoleError = console.error;
+    console.error = function(...args) {
+        const errorMessage = args.join(' ');
+        if (!shouldShowError(errorMessage)) {
+            return; // Suppress this error
+        }
+        originalConsoleError.apply(console, args);
+    };
+    
+    // Payment method switching
+    function switchPaymentMethod(method) {
+      document.querySelectorAll('.payment-method').forEach(el => {
+        el.classList.remove('active');
+      });
+      document.getElementById(`${method}-method`).classList.add('active');
+    }
+    
+    // PayPal Integration with Guest Checkout
+    paypal.Buttons({
+      style: {
+        layout: 'vertical',
+        color: 'blue',
+        shape: 'rect',
+        label: 'paypal'
+      },
+      createOrder: function() {
+        showMessage('processing', 'Creating PayPal order...', 0);
+        
+        return fetch('{% url "create_paypal_order" %}', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken
+          },
+          body: JSON.stringify({
+            plan_name: planName
+          })
+        })
+        .then(function(res) {
+          return res.json();
+        })
+        .then(function(data) {
+          if (data.error) {
+            throw new Error(data.error);
+          }
+          hideAllMessages();
+          return data.orderID;
+        })
+        .catch(function(error) {
+          hideAllMessages();
+          // Only show error if it's not a CSP error
+          const errorMsg = error.message || 'Failed to create PayPal order';
+          if (shouldShowError(errorMsg)) {
+            showError(errorMsg);
+          }
+          throw error;
+        });
+      },
+      
+      onApprove: function(data) {
+        showMessage('processing', 'Processing payment...', 0);
+        
+        return fetch('{% url "capture_paypal_payment" %}', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken
+          },
+          body: JSON.stringify({
+            orderID: data.orderID
+          })
+        })
+        .then(function(res) {
+          return res.json();
+        })
+        .then(function(response) {
+          hideAllMessages();
+          
+          if (response.error === 'compliance_violation') {
+            showMessage('compliance', 
+              'Payment requires manual review. Our team will process it within 24 hours.', 
+              0
+            );
+            setTimeout(() => {
+              window.location.href = "{% url 'payment_success' %}?status=under_review";
+            }, 3000);
+          } else if (response.error) {
+            const errorMsg = response.message || 'Payment processing failed';
+            if (shouldShowError(errorMsg)) {
+              showError(errorMsg);
+            }
+          } else if (response.success) {
+            showMessage('success', response.message || 'Payment completed successfully!');
+            setTimeout(() => {
+              window.location.href = "{% url 'payment_success' %}";
+            }, 1500);
+          }
+        })
+        .catch(function(error) {
+          hideAllMessages();
+          const errorMsg = error.message || 'Payment processing failed. Please try again.';
+          if (shouldShowError(errorMsg)) {
+            showError(errorMsg);
+          }
+        });
+      },
+      
+      onError: function(err) {
+        hideAllMessages();
+        const errorMsg = err.message || 'A PayPal error occurred. Please try again.';
+        if (shouldShowError(errorMsg)) {
+          showError(errorMsg);
+        }
+      },
+      
+      onCancel: function(data) {
+        hideAllMessages();
+        showMessage('error', 'Payment was cancelled.', 3000);
+      }
+    }).render('#paypal-button-container');
+    
+    // Paymob Integration
+    document.getElementById('paymob-button').addEventListener('click', function() {
+      showMessage('processing', 'Processing Paymob payment...', 0);
+      
+      // Get payment form data
+      fetch('{% url "get_payment_form" %}?plan_name=' + planName + '&provider=paymob')
+      .then(response => response.json())
+      .then(data => {
+        // Process Paymob payment
+        return fetch('{% url "handle_payment" %}', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken
+          },
+          body: JSON.stringify({
+            plan_name: planName,
+            provider_name: 'paymob',
+            payment_info: data
+          })
+        });
+      })
+      .then(response => response.json())
+      .then(data => {
+        hideAllMessages();
+        if (data.checkout_url) {
+          // Redirect to Paymob iframe
+          window.location.href = data.checkout_url;
+        } else if (data.error) {
+          const errorMsg = data.error;
+          if (shouldShowError(errorMsg)) {
+            showError(errorMsg);
+          }
+        } else {
+          const errorMsg = 'Payment processing failed';
+          if (shouldShowError(errorMsg)) {
+            showError(errorMsg);
+          }
+        }
+      })
+      .catch(error => {
+        hideAllMessages();
+        const errorMsg = 'Payment processing failed. Please try again.';
+        if (shouldShowError(errorMsg)) {
+          showError(errorMsg);
+        }
+        // Still log to console for debugging, but don't show popup
+        console.error('Paymob error:', error);
+      });
+    });
+    
+    // Error popup close
+ 
+</script>
+</body>
+</html>

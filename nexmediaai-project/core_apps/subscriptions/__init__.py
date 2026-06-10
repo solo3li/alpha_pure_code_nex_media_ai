@@ -1,0 +1,1 @@
+default_app_config = 'core_apps.subscriptions.apps.SubscriptionsConfig'

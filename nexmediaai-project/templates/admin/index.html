@@ -1,0 +1,20 @@
+{% extends "admin/index.html" %}
+
+{% block content %}
+    {{ block.super }}
+
+    <div style="margin:20px 0;">
+        <a href="/admin/export/phone-numbers/csv/" target="_blank" class="button" style="
+            position: absolute;
+            right: 100px;
+            padding:8px 16px;
+            background:#45cf39;
+            color:white;
+            border-radius:5px;
+            text-decoration:none;
+            font-weight:bold;
+        ">
+            Export numbers to CSV
+        </a>
+    </div>
+{% endblock %}

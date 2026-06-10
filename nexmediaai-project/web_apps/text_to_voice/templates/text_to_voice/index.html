@@ -1,0 +1,1425 @@
+{% load i18n %}
+{% get_current_language as CURRENT_LANG %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="{{ CURRENT_LANG }}" dir="{% if CURRENT_LANG == 'ar' %}rtl{% else %}ltr{% endif %}">
+
+<head>
+    <!-- Google Tag Manager -->
+    <script>(function (w, d, s, l, i) {
+            w[l] = w[l] || []; w[l].push({
+                'gtm.start':
+                    new Date().getTime(), event: 'gtm.js'
+            }); var f = d.getElementsByTagName(s)[0],
+                j = d.createElement(s), dl = l != 'dataLayer' ? '&l=' + l : ''; j.async = true; j.src =
+                    'https://www.googletagmanager.com/gtm.js?id=' + i + dl; f.parentNode.insertBefore(j, f);
+        })(window, document, 'script', 'dataLayer', 'GTM-M3QMV7SP');</script>
+    <!-- End Google Tag Manager -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% trans "Text to Voice Generator" %} - NEX MEDIA AI</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css"
+        integrity="sha512-MV7K8+y+gLIBoVD59lQIYicR65iaqukzvf/nwasF0nqhPay5w/9lJmVM2hMDcnK1OnMGCdVK+iQrJ7lzPJQd1w=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <link rel="stylesheet" href="/static/text_to_voice/style.css?v=6">
+
+    <link rel="icon" type="image/x-icon" href="/static/text_to_voice/icons/convertSpeech.ico">
+
+    <!-- Language Switcher CSS -->
+    <link rel="stylesheet" href="{% static 'home/css/lang-switcher.css' %}">
+    {% if CURRENT_LANG == 'ar' %}
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&family=Tajawal:wght@300;400;500;700&display=swap">
+    {% endif %}
+
+    <style>
+        /* ── History Panel ─────────────────────────────────────────────── */
+        .history-section {
+            margin-top: 2rem;
+        }
+        .history-section .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+        .history-item {
+            background: var(--dark-card, #1e1e2e);
+            border: 1px solid var(--dark-border, #2e2e3e);
+            border-radius: 10px;
+            padding: 0.85rem 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.9rem;
+            flex-wrap: wrap;
+        }
+        .history-item__icon {
+            font-size: 1.3rem;
+            flex-shrink: 0;
+            color: var(--primary-orange, #f59e0b);
+        }
+        .history-item__info {
+            flex: 1;
+            min-width: 0;
+        }
+        .history-item__text {
+            font-size: 0.88rem;
+            color: var(--dark-text, #e2e8f0);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 380px;
+        }
+        .history-item__meta {
+            font-size: 0.76rem;
+            color: var(--dark-text-muted, #94a3b8);
+            margin-top: 2px;
+            display: flex;
+            gap: 0.6rem;
+            flex-wrap: wrap;
+        }
+        .history-item__actions {
+            display: flex;
+            gap: 0.5rem;
+            flex-shrink: 0;
+        }
+        .history-btn {
+            padding: 0.35rem 0.75rem;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            transition: opacity 0.2s;
+        }
+        .history-btn:hover { opacity: 0.85; }
+        .history-btn--play {
+            background: var(--primary-blue, #3b82f6);
+            color: #fff;
+        }
+        .history-btn--download {
+            background: var(--primary-green, #22c55e);
+            color: #fff;
+        }
+        .history-status {
+            padding: 0.2rem 0.55rem;
+            border-radius: 20px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+        .history-status--completed { background: #166534; color: #bbf7d0; }
+        .history-status--failed    { background: #7f1d1d; color: #fecaca; }
+        .history-status--expired   { background: #374151; color: #9ca3af; }
+        .history-empty {
+            text-align: center;
+            color: var(--dark-text-muted, #94a3b8);
+            padding: 1.5rem;
+            font-size: 0.9rem;
+        }
+        .history-refresh-btn {
+            background: none;
+            border: 1px solid var(--dark-border, #2e2e3e);
+            color: var(--dark-text-muted, #94a3b8);
+            border-radius: 6px;
+            padding: 0.3rem 0.7rem;
+            font-size: 0.8rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            transition: border-color 0.2s, color 0.2s;
+        }
+        .history-refresh-btn:hover {
+            border-color: var(--primary-orange, #f59e0b);
+            color: var(--primary-orange, #f59e0b);
+        }
+
+        /* ── Processing status shows language badge ─────────────────────── */
+        .processing-lang-badge {
+            display: inline-block;
+            padding: 0.15rem 0.5rem;
+            border-radius: 20px;
+            font-size: 0.74rem;
+            font-weight: 600;
+            background: var(--primary-orange, #f59e0b);
+            color: #000;
+            margin-inline-start: 0.5rem;
+            vertical-align: middle;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Google Tag Manager (noscript) -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-M3QMV7SP" height="0" width="0"
+            style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager (noscript) -->
+
+    <div class="background-overlay"></div>
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-left">
+                <i class="fas fa-volume-up nav-icon"></i>
+                <span class="nav-title">{% trans "Text to Voice Generator" %}</span>
+            </div>
+
+            <div class="nav-right">
+                {% include "partials/language_switcher.html" %}
+                <div class="trial-info">
+                    <div class="trial-card">
+                        <span class="trial-label">{% trans "Available Characters" %}</span>
+                        <span class="trial-value" id="counts">{{ number_of_trials }}</span>
+                    </div>
+                </div>
+
+                <button type="button" class="upgrade-btn" onclick="window.location.href='/#container-sub'">
+                    <i class="fas fa-bolt"></i>
+                    <span>{% trans "Upgrade" %}</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="main-content">
+        <div class="page-header">
+            <h1>{% trans "Text to Voice Generator" %}</h1>
+            <p>{% trans "Effortlessly convert text to natural-sounding speech with our AI tool." %}</p>
+        </div>
+
+        <div class="content-grid">
+            <!-- Voice Settings Section -->
+            <div class="voice-settings-section">
+                <div class="section-header">
+                    <h3>
+                        <i class="fas fa-microphone"></i>
+                        {% trans "Voice Settings" %}
+                    </h3>
+                </div>
+
+                <!-- Language Toggle -->
+                <div class="settings-grid">
+                    <div class="setting-card language-toggle-card">
+                        <label>
+                            <i class="fas fa-language"></i>
+                            {% trans "Language Mode" %}
+                        </label>
+                        <div class="language-toggle-wrapper">
+                            <button type="button" id="lang-other" class="lang-toggle-btn active">
+                                <i class="fas fa-globe"></i>
+                                {% trans "Other Languages" %}
+                            </button>
+                            <button type="button" id="lang-arabic" class="lang-toggle-btn">
+                                <i class="fas fa-book"></i>
+                                {% trans "Arabic" %}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Other Languages Settings -->
+                <div id="other-lang-settings" class="language-settings-section">
+                    <div class="settings-grid">
+                        <!-- Voice Selection -->
+                        <div class="setting-card">
+                            <label for="voice">
+                                <i class="fas fa-user"></i>
+                                {% trans "Select Voice" %}
+                            </label>
+                            <select id="voice">
+                                <option value=""> -- {% trans "Select Voice" %} -- </option>
+                                <option value="alloy">Alloy</option>
+                                <option value="ash">Ash</option>
+                                <option value="ballad">Ballad</option>
+                                <option value="coral">Coral</option>
+                                <option value="echo">Echo</option>
+                                <option value="fable">Fable</option>
+                                <option value="nova">Nova</option>
+                                <option value="onyx">Onyx</option>
+                                <option value="sage">Sage</option>
+                                <option value="shimmer">Shimmer</option>
+                                <option value="verse">Verse</option>
+                            </select>
+                        </div>
+
+                        <!-- Speed Control -->
+                        <div class="setting-card">
+                            <label for="speed">
+                                <i class="fas fa-tachometer-alt"></i>
+                                {% trans "Speed" %}: <span id="speed-value">1.0x</span>
+                            </label>
+                            <input type="range" id="speed" min="0.25" max="4.0" step="0.25" value="1.0">
+                        </div>
+
+                        <!-- Format Selection -->
+                        <div class="setting-card">
+                            <label for="format">
+                                <i class="fas fa-file-audio"></i>
+                                {% trans "Audio Format" %}
+                            </label>
+                            <select id="format">
+                                <option value="mp3">MP3</option>
+                                <option value="wav">WAV</option>
+                                <option value="opus">Opus</option>
+                                <option value="aac">AAC</option>
+                                <option value="flac">FLAC</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Arabic (Darijat) Settings -->
+                <div id="arabic-lang-settings" class="language-settings-section" style="display: none;">
+
+                    <!-- Tier info banner -->
+                    <div
+                        class="tier-banner {% if is_subscriber %}tier-banner--sub{% else %}tier-banner--free{% endif %}">
+                        {% if is_subscriber %}
+                        <i class="fas fa-crown"></i>
+                        <span>مشترك — حتى <strong>{{ sub_char_limit }}</strong> حرف وجميع الأصوات والخيارات متاحة</span>
+                        {% else %}
+                        <i class="fas fa-info-circle"></i>
+                        <span>الحساب المجاني — حتى <strong>{{ free_char_limit }}</strong> حرف والأصوات المجانية فقط</span>
+                        <a href="/#container-sub" class="tier-upgrade-link">ترقية الآن <i
+                                class="fas fa-arrow-left"></i></a>
+                        {% endif %}
+                    </div>
+
+                    <!-- Voice Cards -->
+                    <div class="arabic-voice-section">
+                        <div class="arabic-voice-header">
+                            <label><i class="fas fa-microphone-alt"></i> اختر الصوت</label>
+                            <div class="arabic-voice-filters">
+                                <button class="voice-filter-btn active" data-filter="all">الكل</button>
+                                <button class="voice-filter-btn" data-filter="male">ذكر</button>
+                                <button class="voice-filter-btn" data-filter="female">أنثى</button>
+                            </div>
+                        </div>
+                        <!-- Hidden input for selected voice name -->
+                        <input type="hidden" id="arabic-voice-name" value="">
+                        <div id="arabic-voice-cards" class="arabic-voice-grid"></div>
+                    </div>
+
+                    <!-- Dialect, Emotion, Style dropdowns -->
+                    <div class="settings-grid arabic-bottom-settings">
+                        <div class="setting-card">
+                            <label for="arabic-dialect">
+                                <i class="fas fa-comments"></i>
+                                اللهجة
+                            </label>
+                            <select id="arabic-dialect"></select>
+                        </div>
+                        <div class="setting-card">
+                            <label for="arabic-emotion">
+                                <i class="fas fa-heart"></i>
+                                المشاعر
+                            </label>
+                            <select id="arabic-emotion"></select>
+                        </div>
+                        <div class="setting-card">
+                            <label for="arabic-style">
+                                <i class="fas fa-theater-masks"></i>
+                                أسلوب الأداء
+                            </label>
+                            <select id="arabic-style"></select>
+                        </div>
+
+                        <!-- Custom prompt (premium only) -->
+                        <div class="setting-card custom-prompt-card">
+                            <label for="arabic-custom-prompt">
+                                <i class="fas fa-pen-fancy"></i>
+                                إرشادات مخصصة
+                                {% if not is_subscriber %}
+                                <span class="premium-label"><i class="fas fa-crown"></i> مميز</span>
+                                {% endif %}
+                            </label>
+                            <div class="custom-prompt-wrapper">
+                                <textarea id="arabic-custom-prompt"
+                                    placeholder="أدخل إرشادات مخصصة للصوت..."
+                                    rows="2"
+                                    {% if not is_subscriber %}disabled{% endif %}></textarea>
+                                {% if not is_subscriber %}
+                                <div class="premium-overlay" onclick="showPrimeVoicePopup('الإرشادات المخصصة')">
+                                    <i class="fas fa-lock"></i>
+                                    <span>للمشتركين فقط</span>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Text Input and Audio Player Section -->
+            <div class="text-input-section">
+                <div class="input-form">
+                    <div class="input-area">
+                        <label for="text">
+                            <i class="fas fa-edit"></i>
+                            <span id="text-label">Enter Your Text</span>
+                            <span id="char-limit-badge" class="char-limit-badge">max 4096</span>
+                        </label>
+                        <textarea id="text" name="Text1" placeholder="Enter text here (max 4096 characters)"></textarea>
+                        <div class="character-count">
+                            <span id="char-count">0</span> / <span id="char-limit-display">4096</span> characters
+                        </div>
+                    </div>
+
+                    <div class="action-buttons">
+                        <button id="generate-btn">
+                            <i class="fas fa-magic"></i>
+                            {% trans "Generate Audio" %}
+                        </button>
+                        <button id="download-btn" style="display: none;">
+                            <i class="fas fa-download"></i>
+                            {% trans "Download Audio" %}
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Processing Status Indicator -->
+                <div id="processing-status" class="processing-status-container" style="display: none;">
+                    <div class="processing-status-wrapper">
+                        <div class="processing-spinner">
+                            <div class="spinner-ring"></div>
+                        </div>
+                        <div class="processing-info">
+                            <div class="processing-title" id="processing-title">
+                                جاري المعالجة...
+                                <!-- FIX: language badge injected by JS -->
+                                <span id="processing-lang-badge" class="processing-lang-badge" style="display:none;"></span>
+                            </div>
+                            <div class="processing-subtitle" id="processing-subtitle">يرجى الانتظار، يتم تحويل النص إلى صوت</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modern Audio Player -->
+                <div class="audio-player-container" style="display: none;">
+                    <div class="audio-player-wrapper">
+                        <div class="audio-controls">
+                            <button class="play-pause-btn" id="playPauseBtn">
+                                <i class="fas fa-play"></i>
+                            </button>
+                            <div class="audio-info">
+                                <div class="audio-title">{% trans "Generated Audio" %}</div>
+                                <div class="audio-progress">
+                                    <div class="progress-bar" id="progressBar">
+                                        <div class="progress-fill" id="progressFill"></div>
+                                        <div class="progress-handle" id="progressHandle"></div>
+                                    </div>
+                                    <div class="audio-time">
+                                        <span id="currentTime">0:00</span>
+                                        <span id="duration">0:00</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="volume-control">
+                                <i class="fas fa-volume-up"></i>
+                                <input type="range" id="volumeSlider" min="0" max="100" value="100">
+                            </div>
+                        </div>
+                    </div>
+                    <audio id="audio-player" preload="metadata"></audio>
+                </div>
+
+                <!-- ── History Panel ──────────────────────────────────────── -->
+                <div class="history-section">
+                    <div class="section-header">
+                        <h3 style="margin:0; font-size:1rem;">
+                            <i class="fas fa-history"></i>
+                            {% trans "Recent Conversions" %}
+                        </h3>
+                        <button class="history-refresh-btn" id="history-refresh-btn" onclick="loadHistory()">
+                            <i class="fas fa-sync-alt"></i>
+                            {% trans "Refresh" %}
+                        </button>
+                    </div>
+                    <div id="history-list" class="history-list">
+                        <div class="history-empty">
+                            <i class="fas fa-clock" style="font-size:1.5rem; opacity:.4; display:block; margin-bottom:.5rem;"></i>
+                            {% trans "Your recent conversions will appear here." %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Prime Voice Blocked Popup -->
+    <div id="primeVoicePopup" class="popup-overlay subscription-popup" style="display: none;">
+        <div class="popup-content subscription-content">
+            <div class="popup-header">
+                <h2><i class="fas fa-crown" style="color:#f59e0b"></i> خيار حصري للمشتركين</h2>
+                <button class="popup-close" id="closePrimeVoicePopup">&times;</button>
+            </div>
+            <div class="popup-body">
+                <div class="subscription-icon">
+                    <i class="fas fa-lock"></i>
+                </div>
+                <p id="primeVoicePopupMsg">هذا الخيار متاح للمشتركين فقط. قم بالترقية للوصول إلى جميع الأصوات والخيارات.</p>
+                <div class="subscription-features">
+                    <div class="feature">
+                        <i class="fas fa-microphone"></i>
+                        <span>جميع الأصوات العربية</span>
+                    </div>
+                    <div class="feature">
+                        <i class="fas fa-font" style="font-size:1.1em"></i>
+                        <span>حتى {{ sub_char_limit }} حرف لكل تحويل</span>
+                    </div>
+                    <div class="feature">
+                        <i class="fas fa-pen-fancy"></i>
+                        <span>إرشادات مخصصة للصوت</span>
+                    </div>
+                </div>
+                <div class="subscription-buttons">
+                    <button id="primevoiceSubscribeBtn" class="subscribe-btn">
+                        <i class="fas fa-crown"></i>
+                        اشترك الآن
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modern Trial Popup -->
+    <div id="trialPopup" class="popup-overlay subscription-popup" style="display: none;">
+        <div class="popup-content subscription-content">
+            <div class="popup-header">
+                <h2>Free Trials Exhausted</h2>
+                <button class="popup-close" id="closeTrialPopup">&times;</button>
+            </div>
+            <div class="popup-body">
+                <div class="subscription-icon">
+                    <i class="fas fa-crown"></i>
+                </div>
+                <p>Unlock unlimited text-to-voice conversions and access to premium features with our subscription
+                    plans.</p>
+                <div class="subscription-features">
+                    <div class="feature">
+                        <i class="fas fa-infinity"></i>
+                        <span>Unlimited conversions</span>
+                    </div>
+                    <div class="feature">
+                        <i class="fas fa-microphone"></i>
+                        <span>Premium voice options</span>
+                    </div>
+                    <div class="feature">
+                        <i class="fas fa-rocket"></i>
+                        <span>Faster processing</span>
+                    </div>
+                </div>
+                <div class="subscription-buttons">
+                    <button id="subscribeButton" class="subscribe-btn">
+                        <i class="fas fa-crown"></i>
+                        Subscribe Now
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Login Popup -->
+    <div id="loginPopup" class="popup-overlay subscription-popup" style="display: none;">
+        <div class="popup-content subscription-content">
+            <div class="popup-header">
+                <h2>{% trans "Login Required" %}</h2>
+                <button class="popup-close" id="closeLoginPopup">&times;</button>
+            </div>
+            <div class="popup-body">
+                <div class="subscription-icon">
+                    <i class="fas fa-user-lock"></i>
+                </div>
+                <p>{% trans "You need to be logged in to use this tool." %}</p>
+                <div class="subscription-features">
+                    <div class="feature">
+                        <i class="fas fa-microphone"></i>
+                        <span>{% trans "Access all voices" %}</span>
+                    </div>
+                    <div class="feature">
+                        <i class="fas fa-bolt"></i>
+                        <span>{% trans "Free trial characters" %}</span>
+                    </div>
+                    <div class="feature">
+                        <i class="fas fa-crown"></i>
+                        <span>{% trans "Premium features" %}</span>
+                    </div>
+                </div>
+                <div class="subscription-buttons">
+                    <button id="loginButton" class="subscribe-btn">
+                        <i class="fas fa-sign-in-alt"></i>
+                        {% trans "Login Now" %}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alert Popup -->
+    <div id="popupAlert" class="alert-popup"></div>
+
+    <script>
+        // ── Tier config injected from Django ─────────────────────────────────
+        const USE_GEMINI = {{ use_gemini|yesno:'true,false' }};
+
+        const IS_SUBSCRIBER = {{ is_subscriber|yesno:'true,false' }};
+        const FREE_CHAR_LIMIT = {{ free_char_limit }};
+        const SUB_CHAR_LIMIT = {{ sub_char_limit }};
+
+        // ── DB-driven data from Django context ───────────────────────────────
+        const DARIJAT_VOICES = {{ voices_json|safe }};
+        const DARIJAT_DIALECTS = {{ dialects_json|safe }};
+        const DARIJAT_EMOTIONS = {{ emotions_json|safe }};
+        const DARIJAT_STYLES = {{ styles_json|safe }};
+
+        // ── Active processing (for page-refresh resume) ──────────────────────
+        // FIX: also carry the language of the active job so we can restore the
+        //      correct UI section instead of always defaulting to "Other".
+        const ACTIVE_PROCESSING_ID = {% if active_processing_id %}"{{ active_processing_id }}"{% else %}null{% endif %};
+        const ACTIVE_PROCESSING_LANGUAGE = {% if active_processing_language %}"{{ active_processing_language }}"{% else %}null{% endif %}
+
+        const remainingWords = parseInt($('.trial-value').text(), 10);
+
+        // Language toggle state
+        // FIX: initialise from the active processing language if present
+        let currentLanguage = (ACTIVE_PROCESSING_ID && ACTIVE_PROCESSING_LANGUAGE)
+            ? ACTIVE_PROCESSING_LANGUAGE
+            : 'other';
+
+        let selectedArabicVoiceName = '';
+        let pollingInterval = null;
+
+        // ── Build free voice set from DB data ────────────────────────────────
+        const FREE_VOICE_NAMES = new Set(
+            DARIJAT_VOICES.filter(v => !v.is_premium).map(v => v.voice_name)
+        );
+
+        // ── Apply the correct language section on initial render ─────────────
+        function applyLanguageUI(lang) {
+            currentLanguage = lang;
+            if (lang === 'arabic') {
+                document.getElementById('lang-arabic').classList.add('active');
+                document.getElementById('lang-other').classList.remove('active');
+                document.getElementById('other-lang-settings').style.display = 'none';
+                document.getElementById('arabic-lang-settings').style.display = 'block';
+            } else {
+                document.getElementById('lang-other').classList.add('active');
+                document.getElementById('lang-arabic').classList.remove('active');
+                document.getElementById('other-lang-settings').style.display = 'block';
+                document.getElementById('arabic-lang-settings').style.display = 'none';
+            }
+            updateCharLimitUI();
+        }
+
+        function updateCharLimitUI() {
+            const isArabic = currentLanguage === 'arabic';
+            const limit = isArabic ? (IS_SUBSCRIBER ? SUB_CHAR_LIMIT : FREE_CHAR_LIMIT) : 4096;
+            document.getElementById('char-limit-display').textContent = limit;
+            document.getElementById('char-limit-badge').textContent = 'max ' + limit;
+            document.getElementById('text').setAttribute('placeholder',
+                isArabic
+                    ? `أدخل النص هنا (الحد الأقصى ${limit} حرف)`
+                    : `Enter text here (max ${limit} characters)`
+            );
+            document.getElementById('text').dispatchEvent(new Event('input'));
+        }
+
+        document.getElementById('lang-other').addEventListener('click', function () {
+            // FIX: block switching while a job is actively being processed
+            if (pollingInterval) {
+                showPopup('لا يمكن تغيير اللغة أثناء المعالجة. يرجى الانتظار.', true);
+                return;
+            }
+            applyLanguageUI('other');
+        });
+
+        document.getElementById('lang-arabic').addEventListener('click', function () {
+            // FIX: block switching while a job is actively being processed
+            if (pollingInterval) {
+                showPopup('لا يمكن تغيير اللغة أثناء المعالجة. يرجى الانتظار.', true);
+                return;
+            }
+            applyLanguageUI('arabic');
+        });
+
+        // ── Populate option dropdowns from DB data ────────────────────────────
+        function populateOptionDropdown(selectId, options, placeholder) {
+            const sel = document.getElementById(selectId);
+            if (!sel) return;
+            sel.innerHTML = '';
+
+            const defaultOpt = document.createElement('option');
+            defaultOpt.value = '';
+            defaultOpt.textContent = placeholder;
+            sel.appendChild(defaultOpt);
+
+            options.forEach(opt => {
+                const o = document.createElement('option');
+                o.value = opt.value;
+                o.textContent = opt.name;
+                if (opt.is_premium && !IS_SUBSCRIBER) {
+                    o.textContent += ' 👑';
+                    o.dataset.premium = '1';
+                }
+                sel.appendChild(o);
+            });
+
+            // Prevent free users from selecting premium options
+            sel.addEventListener('change', function () {
+                const selected = this.options[this.selectedIndex];
+                if (selected && selected.dataset.premium === '1' && !IS_SUBSCRIBER) {
+                    this.value = '';
+                    showPrimeVoicePopup(selected.textContent.replace(' 👑', ''));
+                }
+            });
+        }
+
+        populateOptionDropdown('arabic-dialect', DARIJAT_DIALECTS, '-- اختر اللهجة --');
+        populateOptionDropdown('arabic-emotion', DARIJAT_EMOTIONS, '-- اختر المشاعر (اختياري) --');
+        populateOptionDropdown('arabic-style', DARIJAT_STYLES, '-- اختر أسلوب الأداء (اختياري) --');
+
+        // ── Voice card builder ───────────────────────────────────────────────
+        function buildVoiceCards(filter = 'all') {
+            const grid = document.getElementById('arabic-voice-cards');
+            if (!grid) return;
+            grid.innerHTML = '';
+
+            let filtered = filter === 'all'
+                ? [...DARIJAT_VOICES]
+                : DARIJAT_VOICES.filter(v => v.gender === filter);
+
+            // Free voices first, then alphabetical
+            filtered.sort((a, b) => {
+                const aFree = a.is_premium ? 1 : 0;
+                const bFree = b.is_premium ? 1 : 0;
+                if (aFree !== bFree) return aFree - bFree;
+                return a.name.localeCompare(b.name);
+            });
+
+            filtered.forEach(v => {
+                const isFree = !v.is_premium;
+                const isPrime = v.is_premium;
+
+                const card = document.createElement('div');
+                card.className = 'voice-card'
+                    + (isPrime ? ' voice-card--prime' : '')
+                    + (selectedArabicVoiceName === v.voice_name ? ' voice-card--selected' : '');
+                card.dataset.voiceName = v.voice_name;
+                card.dataset.isPrime = isPrime ? '1' : '0';
+
+                const genderIcon = v.gender === 'female' ? '♀' : v.gender === 'male' ? '♂' : '🧒';
+                const genderLabel = v.gender === 'female' ? 'أنثى' : v.gender === 'male' ? 'ذكر' : 'أطفال';
+
+                card.innerHTML = `
+                    <div class="voice-card__badge ${isFree ? 'badge--free' : 'badge--prime'}">
+                        ${isFree ? 'مجاني' : '<i class="fas fa-crown"></i> مميز'}
+                    </div>
+                    <div class="voice-card__name">${v.name}</div>
+                    <div class="voice-card__accent">${v.accent || ''}</div>
+                    <div class="voice-card__gender">${genderIcon} ${genderLabel}</div>
+                    <div class="voice-card__actions">
+                        ${v.has_demo && !USE_GEMINI ? `<button class="voice-demo-btn" data-voice-id="${v.id}" title="استمع لعينة الصوت"><i class="fas fa-headphones"></i></button>` : ''}
+                        ${isPrime ? '<i class="fas fa-lock voice-card__lock"></i>' : ''}
+                    </div>
+                `;
+
+                card.addEventListener('click', function (e) {
+                    if (e.target.closest('.voice-demo-btn')) return;
+
+                    if (isPrime && !IS_SUBSCRIBER) {
+                        showPrimeVoicePopup(v.name);
+                        return;
+                    }
+                    document.querySelectorAll('.voice-card').forEach(c => c.classList.remove('voice-card--selected'));
+                    card.classList.add('voice-card--selected');
+                    selectedArabicVoiceName = v.voice_name;
+                    document.getElementById('arabic-voice-name').value = v.voice_name;
+                });
+
+                grid.appendChild(card);
+            });
+
+            // Attach demo listeners
+            grid.querySelectorAll('.voice-demo-btn').forEach(btn => {
+                btn.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    const voiceId = this.dataset.voiceId;
+                    playVoiceDemo(voiceId, this);
+                });
+            });
+        }
+
+        // ── Demo audio player ────────────────────────────────────────────────
+        let demoAudio = null;
+        let activeDemoBtn = null;
+
+        function playVoiceDemo(voiceId, btn) {
+            if (activeDemoBtn === btn && demoAudio && !demoAudio.paused) {
+                demoAudio.pause();
+                btn.innerHTML = '<i class="fas fa-headphones"></i>';
+                btn.classList.remove('demo-playing');
+                activeDemoBtn = null;
+                return;
+            }
+            if (demoAudio) {
+                demoAudio.pause();
+                if (activeDemoBtn) {
+                    activeDemoBtn.innerHTML = '<i class="fas fa-headphones"></i>';
+                    activeDemoBtn.classList.remove('demo-playing');
+                }
+            }
+            const url = `/text-to-voice/voice_demo/${voiceId}/`;
+            demoAudio = new Audio(url);
+            demoAudio.play().then(() => {
+                btn.innerHTML = '<i class="fas fa-stop"></i>';
+                btn.classList.add('demo-playing');
+                activeDemoBtn = btn;
+            }).catch(() => {
+                showPopup('لا تتوفر عينة صوتية لهذا الصوت.', true);
+            });
+            demoAudio.addEventListener('ended', () => {
+                btn.innerHTML = '<i class="fas fa-headphones"></i>';
+                btn.classList.remove('demo-playing');
+                activeDemoBtn = null;
+            });
+        }
+
+        // ── Prime voice popup ────────────────────────────────────────────────
+        function showPrimeVoicePopup(itemName) {
+            const msg = document.getElementById('primeVoicePopupMsg');
+            if (msg && itemName) {
+                msg.textContent = `"${itemName}" متاح للمشتركين فقط. اشترك الآن للوصول إلى جميع الأصوات والخيارات.`;
+            }
+            const el = document.getElementById('primeVoicePopup');
+            if (!el) return;
+            el.style.display = 'flex';
+            requestAnimationFrame(() => el.classList.add('show'));
+        }
+
+        $(document).on('click', '#closePrimeVoicePopup', function () { hidePopupById('primeVoicePopup'); });
+        $(document).on('click', '#primevoiceSubscribeBtn', function () { window.location.href = '/#container-sub'; });
+
+        // Wire up filter buttons
+        document.querySelectorAll('.voice-filter-btn').forEach(btn => {
+            btn.addEventListener('click', function () {
+                document.querySelectorAll('.voice-filter-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                buildVoiceCards(this.dataset.filter);
+            });
+        });
+
+        // Build voice cards on load
+        buildVoiceCards('all');
+        updateCharLimitUI();
+
+        // Handle speed slider
+        document.getElementById('speed').addEventListener('input', function () {
+            document.getElementById('speed-value').textContent = this.value + 'x';
+        });
+
+        // Handle character count
+        const rootStyles = getComputedStyle(document.documentElement);
+
+        document.getElementById('text').addEventListener('input', function () {
+            const textWithoutSpaces = this.value.replace(/\s/g, '');
+            const charCount = textWithoutSpaces.length;
+            const charCountSpan = document.getElementById('char-count');
+            const limit = currentLanguage === 'arabic'
+                ? (IS_SUBSCRIBER ? SUB_CHAR_LIMIT : FREE_CHAR_LIMIT)
+                : 4096;
+
+            charCountSpan.textContent = charCount;
+
+            if (this.value.length > limit) {
+                charCountSpan.style.color = rootStyles.getPropertyValue('--accent-red');
+                this.style.borderColor = rootStyles.getPropertyValue('--accent-red');
+            } else if (this.value.length > limit * 0.85) {
+                charCountSpan.style.color = rootStyles.getPropertyValue('--primary-orange');
+                this.style.borderColor = rootStyles.getPropertyValue('--primary-orange');
+            } else {
+                charCountSpan.style.color = rootStyles.getPropertyValue('--dark-text-muted');
+                this.style.borderColor = rootStyles.getPropertyValue('--dark-border');
+            }
+        });
+
+        function showLoginPopup() {
+            const el = document.getElementById('loginPopup');
+            if (!el) return;
+            el.style.display = 'flex';
+            requestAnimationFrame(() => el.classList.add('show'));
+        }
+
+        $(document).on("click", "#closeLoginPopup", function () { hidePopupById('loginPopup'); });
+        $(document).on("click", "#loginButton", function () {
+            window.location.href = '/login/?next=' + encodeURIComponent(window.location.pathname);
+        });
+
+        // Audio Player Functions
+        const audio = document.getElementById('audio-player');
+        const playPauseBtn = document.getElementById('playPauseBtn');
+        const progressBar = document.getElementById('progressBar');
+        const progressFill = document.getElementById('progressFill');
+        const progressHandle = document.getElementById('progressHandle');
+        const currentTimeSpan = document.getElementById('currentTime');
+        const durationSpan = document.getElementById('duration');
+        const volumeSlider = document.getElementById('volumeSlider');
+
+        function initAudioPlayer() {
+            playPauseBtn.addEventListener('click', togglePlayPause);
+            progressBar.addEventListener('click', setProgress);
+            audio.addEventListener('timeupdate', updateProgress);
+            audio.addEventListener('loadedmetadata', updateDuration);
+            volumeSlider.addEventListener('input', setVolume);
+        }
+
+        function togglePlayPause() {
+            if (audio.paused) {
+                audio.play();
+                playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
+            } else {
+                audio.pause();
+                playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
+            }
+        }
+
+        function setProgress(e) {
+            const rect = progressBar.getBoundingClientRect();
+            const percent = (e.clientX - rect.left) / rect.width;
+            audio.currentTime = percent * audio.duration;
+        }
+
+        function updateProgress() {
+            const percent = (audio.currentTime / audio.duration) * 100;
+            progressFill.style.width = percent + '%';
+            progressHandle.style.left = percent + '%';
+            currentTimeSpan.textContent = formatTime(audio.currentTime);
+        }
+
+        function updateDuration() {
+            durationSpan.textContent = formatTime(audio.duration);
+        }
+
+        function setVolume() {
+            audio.volume = volumeSlider.value / 100;
+        }
+
+        function formatTime(seconds) {
+            const minutes = Math.floor(seconds / 60);
+            const remainingSeconds = Math.floor(seconds % 60);
+            return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+        }
+
+        function showPopup(message, isError = false) {
+            const popup = document.getElementById("popupAlert");
+            popup.textContent = message;
+            popup.className = `alert-popup ${isError ? 'error' : 'success'} show`;
+            const hideDelay = isError ? 10000 : 7000;
+            setTimeout(() => { popup.classList.remove('show'); }, hideDelay);
+        }
+
+        function showTrialPopup() {
+            const el = document.getElementById('trialPopup');
+            if (!el) return;
+            el.style.display = 'flex';
+            requestAnimationFrame(() => el.classList.add('show'));
+        }
+
+        function hidePopupById(id) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.classList.remove('show');
+            setTimeout(() => {
+                if (!el.classList.contains('show')) {
+                    el.style.display = 'none';
+                }
+            }, 300);
+        }
+
+        // ── Processing status helpers ────────────────────────────────────────
+        function showProcessingStatus(show = true, lang = null) {
+            const statusEl = document.getElementById('processing-status');
+            const generateBtn = document.getElementById('generate-btn');
+            const audioPlayerContainer = document.querySelector('.audio-player-container');
+            const downloadBtn = document.getElementById('download-btn');
+            const badge = document.getElementById('processing-lang-badge');
+
+            if (show) {
+                // FIX: show which language is being processed
+                if (lang) {
+                    badge.textContent = lang === 'arabic' ? 'عربي' : 'Other';
+                    badge.style.display = 'inline-block';
+                } else {
+                    badge.style.display = 'none';
+                }
+                statusEl.style.display = 'block';
+                generateBtn.disabled = true;
+                generateBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري المعالجة...';
+                generateBtn.classList.add('loading');
+                audioPlayerContainer.style.display = 'none';
+                downloadBtn.style.display = 'none';
+            } else {
+                badge.style.display = 'none';
+                statusEl.style.display = 'none';
+                generateBtn.disabled = false;
+                generateBtn.innerHTML = '<i class="fas fa-magic"></i> {% trans "Generate Audio" %}';
+                generateBtn.classList.remove('loading');
+            }
+        }
+
+        function startPolling(processingId, lang) {
+            // FIX: pass lang through so the badge stays correct during polling
+            showProcessingStatus(true, lang || currentLanguage);
+
+            if (pollingInterval) clearInterval(pollingInterval);
+            let pollingErrorCount = 0; // ← add this
+            // ── Fix 2: handle 404 / error response in polling ──────────────
+            pollingInterval = setInterval(() => {
+                fetch(`/text-to-voice/check_status/${processingId}/`)
+                    .then(r => {
+                        if (r.status === 404) {
+                            // Job not found — stop polling, reset UI
+                            clearInterval(pollingInterval);
+                            pollingInterval = null;
+                            showProcessingStatus(false);
+                            showPopup('لم يتم العثور على المهمة. ربما انتهت صلاحيتها.', true);
+                            loadHistory();
+                            throw new Error('NOT_FOUND');
+                        }
+                        return r.json();
+                    })
+                    .then(data => {
+                        // ── Fix 3: handle error field from server ──────────
+                        if (data.error) {
+                            clearInterval(pollingInterval);
+                            pollingInterval = null;
+                            showProcessingStatus(false);
+                            showPopup(data.error, true);
+                            loadHistory();
+                            return;
+                        }
+
+                        if (data.status === 'COMPLETED') {
+                            clearInterval(pollingInterval);
+                            pollingInterval = null;
+                            showProcessingStatus(false);
+
+                            const audioPlayer = document.getElementById('audio-player');
+                            const audioPlayerContainer = document.querySelector('.audio-player-container');
+                            const downloadBtn = document.getElementById('download-btn');
+
+                            audioPlayer.src = data.audio_url;
+                            audioPlayerContainer.style.display = 'block';
+                            downloadBtn.style.display = 'inline-block';
+                            downloadBtn.onclick = function () { downloadAudio(data.audio_url); };
+                            playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
+
+                            updateTrialCount();
+                            loadHistory();
+                            showPopup('تم توليد الصوت بنجاح! يمكنك الاستماع أو التحميل.');
+
+                        } else if (data.status === 'FAILED') {
+                            clearInterval(pollingInterval);
+                            pollingInterval = null;
+                            showProcessingStatus(false);
+                            loadHistory();
+                            showPopup('حدث خطأ أثناء المعالجة.', true);
+                        }
+                        // PENDING / PROCESSING — keep polling
+                    })
+                    .catch(err => {
+                        if (err.message === 'NOT_FOUND') return; // already handled
+                        console.error('Polling error:', err);
+                        // On genuine network error, increment a counter and stop after 5 misses
+                        pollingErrorCount = (pollingErrorCount || 0) + 1;
+                        if (pollingErrorCount >= 5) {
+                            clearInterval(pollingInterval);
+                            pollingInterval = null;
+                            showProcessingStatus(false);
+                            showPopup('انقطع الاتصال. يرجى تحديث الصفحة.', true);
+                        }
+                    });
+            }, 3000);
+        }
+
+        // ── Build style_instruction from selections ──────────────────────────
+        function buildStyleInstruction() {
+            const parts = [];
+
+            const dialect = document.getElementById('arabic-dialect').value;
+            if (dialect) parts.push(dialect);
+
+            const emotion = document.getElementById('arabic-emotion').value;
+            if (emotion) parts.push(emotion);
+
+            const style = document.getElementById('arabic-style').value;
+            if (style) parts.push(style);
+
+            const customPrompt = document.getElementById('arabic-custom-prompt').value.trim();
+            if (customPrompt && IS_SUBSCRIBER) parts.push(customPrompt);
+
+            return parts.join(',');
+        }
+
+        // ── Validation ──────────────────────────────────────────────────────
+        function validateInputs() {
+            const text = document.getElementById("text").value.trim();
+
+            if (!text) {
+                showPopup("Please enter some text to convert to speech.", true);
+                return false;
+            }
+
+            if ("{{ number_of_trials }}" === "Login First") {
+                showLoginPopup();
+                return false;
+            }
+
+            if (currentLanguage === 'other') {
+                const voice = document.getElementById("voice").value;
+                if (!voice) {
+                    showPopup("Please select a voice.", true);
+                    return false;
+                }
+            } else if (currentLanguage === 'arabic') {
+                if (!selectedArabicVoiceName) {
+                    showPopup("يرجى اختيار صوت عربي.", true);
+                    return false;
+                }
+                // Premium voice guard client-side
+                const voiceData = DARIJAT_VOICES.find(v => v.voice_name === selectedArabicVoiceName);
+                if (voiceData && voiceData.is_premium && !IS_SUBSCRIBER) {
+                    showPrimeVoicePopup(voiceData.name);
+                    return false;
+                }
+                const arabicDialect = document.getElementById("arabic-dialect").value;
+                if (!arabicDialect) {
+                    showPopup("يرجى اختيار اللهجة.", true);
+                    return false;
+                }
+                // Arabic char limit check
+                const arabicLimit = IS_SUBSCRIBER ? SUB_CHAR_LIMIT : FREE_CHAR_LIMIT;
+                if (text.length > arabicLimit) {
+                    showPopup(`النص طويل جداً. الحد الأقصى ${arabicLimit} حرف لخطتك.`, true);
+                    return false;
+                }
+            }
+
+            if (currentLanguage !== 'arabic' && text.length > 4096) {
+                showPopup("Text is too long. Maximum 4096 characters supported.", true);
+                return false;
+            }
+
+            const charCount = text.replace(/\s/g, '').length;
+            if (charCount === 0) {
+                showPopup("Please enter valid text with at least one character.", true);
+                return false;
+            }
+            if (charCount > remainingWords) {
+                showTrialPopup();
+                return false;
+            }
+
+            return true;
+        }
+
+        // ── Generate button handler ──────────────────────────────────────────
+        document.getElementById("generate-btn").addEventListener("click", function (e) {
+            e.preventDefault();
+
+            if (!validateInputs()) return;
+
+            const text = document.getElementById("text").value.trim();
+            let payload = {};
+
+            if (currentLanguage === 'other') {
+                const voice = document.getElementById("voice").value;
+                const speed = parseFloat(document.getElementById("speed").value);
+                const format = document.getElementById("format").value;
+                payload = { language: 'other', text, voice, speed, format };
+            } else if (currentLanguage === 'arabic') {
+                const styleInstruction = buildStyleInstruction();
+                payload = {
+                    language: 'arabic',
+                    text,
+                    voice_name: selectedArabicVoiceName,
+                    style_instruction: styleInstruction,
+                };
+            }
+
+            // Get CSRF token
+            function getCookie(name) {
+                let cookieValue = null;
+                if (document.cookie && document.cookie !== '') {
+                    const cookies = document.cookie.split(';');
+                    for (let i = 0; i < cookies.length; i++) {
+                        const cookie = cookies[i].trim();
+                        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                            break;
+                        }
+                    }
+                }
+                return cookieValue;
+            }
+
+            const csrftoken = getCookie('csrftoken');
+            showProcessingStatus(true, currentLanguage);
+
+            fetch("/text-to-voice/generate_audio/", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": csrftoken,
+                },
+                body: JSON.stringify(payload),
+            })
+                .then(response => {
+                    if (response.status === 403) {
+                        showProcessingStatus(false);
+                        return response.json().then(data => {
+                            if (data.show === 'prime_voice_blocked') {
+                                showPrimeVoicePopup(data.message || '');
+                            } else {
+                                showLoginPopup();
+                            }
+                            throw new Error('HANDLED');
+                        });
+                    }
+                    if (response.status === 429) {
+                        showProcessingStatus(false);
+                        return response.json().then(data => {
+                            showPopup(data.error || 'لديك طلب قيد المعالجة.', true);
+                            throw new Error('HANDLED');
+                        });
+                    }
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.error) {
+                        showProcessingStatus(false);
+                        if (data.show === 'No-sub-no-Trial') {
+                            showTrialPopup();
+                        } else {
+                            showPopup(data.error, true);
+                        }
+                        return;
+                    }
+
+                    // Got processing_id — start polling
+                    if (data.processing_id) {
+                        console.log('Started processing:', data.processing_id);
+                        startPolling(data.processing_id, currentLanguage);
+                    }
+                })
+                .catch(error => {
+                    if (error.message === 'HANDLED') return;
+                    console.error("Fetch error:", error);
+                    showProcessingStatus(false);
+                    showPopup("فشل في إرسال الطلب. يرجى المحاولة مرة أخرى.", true);
+                });
+        });
+
+        function downloadAudio(audioUrl) {
+            const link = document.createElement('a');
+            link.href = audioUrl;
+            const format = currentLanguage === 'arabic' ? 'mp3' : document.getElementById("format").value;
+            link.download = `generated_audio.${format}`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            showPopup("بدأ التحميل بنجاح!");
+        }
+
+        function updateTrialCount() {
+            $.ajax({
+                url: "/text-to-voice/get_trials_left",
+                type: "GET",
+                timeout: 10000,
+                success: function (data) {
+                    if (data.trials_left !== undefined) {
+                        $("#counts").text(data.trials_left);
+                        if (data.trials_left === 0) {
+                            setTimeout(() => showTrialPopup(), 2000);
+                        }
+                    }
+                },
+                error: function () {
+                    console.error("Failed to fetch updated trial count");
+                },
+            });
+        }
+
+        // Close trial popup
+        $(document).on("click", "#closeTrialPopup", function () { hidePopupById('trialPopup'); });
+        $(document).on("click", "#subscribeButton", function () { window.location.href = '/#container-sub'; });
+
+        // Close popup when clicking outside
+        $(document).on("click", ".popup-overlay", function (e) {
+            if (e.target === this) {
+                const id = this.id;
+                if (id) hidePopupById(id);
+                else $(this).removeClass('show');
+            }
+        });
+
+        // ── History ──────────────────────────────────────────────────────────
+        let historyAudio = null;
+        let historyActiveBtn = null;
+
+        function loadHistory() {
+            const listEl = document.getElementById('history-list');
+            if (!listEl) return;
+
+            // Only fetch if user is logged in (check a known auth signal)
+            if ("{{ number_of_trials }}" === "Login First") {
+                listEl.innerHTML = '<div class="history-empty">{% trans "Login to see your history." %}</div>';
+                return;
+            }
+
+            fetch('/text-to-voice/history/')
+                .then(r => r.json())
+                .then(data => {
+                    if (data.error || !data.history || data.history.length === 0) {
+                        listEl.innerHTML = `
+                            <div class="history-empty">
+                                <i class="fas fa-clock" style="font-size:1.5rem;opacity:.4;display:block;margin-bottom:.5rem;"></i>
+                                {% trans "No conversions yet." %}
+                            </div>`;
+                        return;
+                    }
+
+                    listEl.innerHTML = '';
+                    data.history.forEach(item => {
+                        const langLabel = item.language === 'arabic' ? '🇸🇦 عربي' : '🌐 Other';
+                        const expired = item.status === 'COMPLETED' && !item.audio_url;
+
+                        const statusClass = expired
+                            ? 'history-status--expired'
+                            : item.status === 'COMPLETED'
+                                ? 'history-status--completed'
+                                : 'history-status--failed';
+
+                        const statusLabel = expired
+                            ? '{% trans "Expired" %}'
+                            : item.status === 'COMPLETED'
+                                ? '{% trans "Done" %}'
+                                : '{% trans "Failed" %}';
+
+                        const actionsHtml = item.audio_url ? `
+                            <button class="history-btn history-btn--play"
+                                    data-url="${item.audio_url}"
+                                    data-pid="${item.processing_id}"
+                                    onclick="playHistoryAudio(this)">
+                                <i class="fas fa-play"></i>
+                            </button>
+                            <button class="history-btn history-btn--download"
+                                    onclick="downloadAudio('${item.audio_url}')">
+                                <i class="fas fa-download"></i>
+                            </button>
+                        ` : '';
+
+                        const row = document.createElement('div');
+                        row.className = 'history-item';
+                        row.innerHTML = `
+                            <div class="history-item__icon">
+                                <i class="fas fa-volume-up"></i>
+                            </div>
+                            <div class="history-item__info">
+                                <div class="history-item__text" title="${item.text_preview}">${item.text_preview || '—'}</div>
+                                <div class="history-item__meta">
+                                    <span>${langLabel}</span>
+                                    <span><i class="fas fa-microphone" style="font-size:.7rem"></i> ${item.voice_name || '—'}</span>
+                                    <span><i class="fas fa-font" style="font-size:.7rem"></i> ${item.char_count}</span>
+                                    <span><i class="fas fa-clock" style="font-size:.7rem"></i> ${item.created_at}</span>
+                                    ${item.status === 'FAILED' ? `<span style="color:#f87171"><i class="fas fa-exclamation-circle"></i> حدث خطأ أثناء المعالجة.</span>` : ''}
+                                </div>
+                            </div>
+                            <span class="history-status ${statusClass}">${statusLabel}</span>
+                            <div class="history-item__actions">${actionsHtml}</div>
+                        `;
+                        listEl.appendChild(row);
+                    });
+                })
+                .catch(err => {
+                    console.error('History fetch error:', err);
+                });
+        }
+
+        function playHistoryAudio(btn) {
+            const url = btn.dataset.url;
+
+            // If clicking the same button while playing → pause
+            if (historyActiveBtn === btn && historyAudio && !historyAudio.paused) {
+                historyAudio.pause();
+                btn.innerHTML = '<i class="fas fa-play"></i>';
+                historyActiveBtn = null;
+                return;
+            }
+
+            // Stop previous
+            if (historyAudio) {
+                historyAudio.pause();
+                if (historyActiveBtn) {
+                    historyActiveBtn.innerHTML = '<i class="fas fa-play"></i>';
+                }
+            }
+
+            historyAudio = new Audio(url);
+            historyAudio.play().then(() => {
+                btn.innerHTML = '<i class="fas fa-pause"></i>';
+                historyActiveBtn = btn;
+            }).catch(() => {
+                showPopup('تعذر تشغيل الملف الصوتي.', true);
+            });
+
+            historyAudio.addEventListener('ended', () => {
+                btn.innerHTML = '<i class="fas fa-play"></i>';
+                historyActiveBtn = null;
+            });
+        }
+
+        // ── Initialize page ──────────────────────────────────────────────────
+        document.addEventListener('DOMContentLoaded', function () {
+            console.log("Page loaded, remaining words:", remainingWords);
+            initAudioPlayer();
+
+            // Initialize character count
+            const textArea = document.getElementById('text');
+            const textWithoutSpaces = textArea.value.replace(/\s/g, '');
+            document.getElementById('char-count').textContent = textWithoutSpaces.length;
+
+            // FIX: restore the correct language section on page load
+            applyLanguageUI(currentLanguage);
+
+            // Resume polling if there's an active processing task, with the correct language
+            if (ACTIVE_PROCESSING_ID) {
+                console.log('Resuming polling for:', ACTIVE_PROCESSING_ID, 'language:', ACTIVE_PROCESSING_LANGUAGE);
+                startPolling(ACTIVE_PROCESSING_ID, ACTIVE_PROCESSING_LANGUAGE || 'other');
+            }
+
+            if (remainingWords <= 0 && "{{ number_of_trials }}" !== "Login First") {
+                showPopup("لا يوجد أحرف متبقية. يرجى الاشتراك للمتابعة.", true);
+            }
+
+            // Load history on page load
+            loadHistory();
+        });
+    </script>
+
+    <script src="{% static 'home/js/lang-switcher.js' %}"></script>
+</body>
+
+</html>

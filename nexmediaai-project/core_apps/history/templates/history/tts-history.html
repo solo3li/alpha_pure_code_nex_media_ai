@@ -1,0 +1,567 @@
+{% load static %}
+{% load i18n %}
+{% get_current_language as CURRENT_LANG %}
+<!DOCTYPE html>
+<html lang="{{ CURRENT_LANG }}" dir="{% if CURRENT_LANG == 'ar' %}rtl{% else %}ltr{% endif %}">
+
+<head>
+    <!-- Google Tag Manager -->
+    <script>(function (w, d, s, l, i) {
+            w[l] = w[l] || []; w[l].push({
+                'gtm.start':
+                    new Date().getTime(), event: 'gtm.js'
+            }); var f = d.getElementsByTagName(s)[0],
+                j = d.createElement(s), dl = l != 'dataLayer' ? '&l=' + l : ''; j.async = true; j.src =
+                    'https://www.googletagmanager.com/gtm.js?id=' + i + dl; f.parentNode.insertBefore(j, f);
+        })(window, document, 'script', 'dataLayer', 'GTM-M3QMV7SP');</script>
+    <!-- End Google Tag Manager -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% trans "Text to Voice History" %} - NEX MEDIA AI</title>
+    <link rel="stylesheet" href="{% static 'history/text-style.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css">
+    {% if CURRENT_LANG == 'ar' %}
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&family=Tajawal:wght@300;400;500;700&display=swap">
+    {% endif %}
+
+    <style>
+        /* ── TTS card — sits inside .history-item from text-style.css ───────── */
+
+        .tts-item {
+            display: flex;
+            flex-direction: column;
+            /* override the default overflow:hidden so border-radius on footer works */
+            overflow: hidden;
+        }
+
+        /* Main padded body of each card */
+        .tts-body {
+            padding: var(--space-6);
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-4);
+        }
+
+        /* ── Badge row ──────────────────────────────────────────────────────── */
+        .tts-badges {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: var(--space-2);
+        }
+
+        .tts-badges-left {
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.2rem 0.6rem;
+            border-radius: var(--radius-full);
+            font-size: var(--font-size-xs);
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .badge--lang-arabic {
+            background: #1e3a5f;
+            color: #93c5fd;
+        }
+
+        .badge--lang-other {
+            background: #1a3a2a;
+            color: #86efac;
+        }
+
+        .badge--voice {
+            background: #2d1f4e;
+            color: #c4b5fd;
+        }
+
+        .badge--chars {
+            background: #2e2208;
+            color: #fcd34d;
+        }
+
+        .badge--completed {
+            background: #166534;
+            color: #bbf7d0;
+        }
+
+        .badge--failed {
+            background: #7f1d1d;
+            color: #fecaca;
+        }
+
+        .badge--expired {
+            background: #1f2937;
+            color: #9ca3af;
+        }
+
+        /* ── Text preview — matches .text-content style from base CSS ──────── */
+        .tts-text-preview {
+            font-size: var(--font-size-base);
+            color: var(--dark-text);
+            line-height: var(--leading-relaxed);
+            word-wrap: break-word;
+            padding: var(--space-4);
+            background: var(--dark-bg);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--dark-border);
+            /* Clamp long text to 3 lines */
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        /* ── Mini audio player ──────────────────────────────────────────────── */
+        .tts-audio-row {
+            display: flex;
+            align-items: center;
+            gap: var(--space-3);
+            flex-wrap: wrap;
+        }
+
+        .tts-audio-player {
+            display: flex;
+            align-items: center;
+            gap: var(--space-3);
+            background: var(--dark-bg);
+            border: 1px solid var(--dark-border);
+            border-radius: var(--radius-lg);
+            padding: var(--space-3) var(--space-4);
+            flex: 1;
+            min-width: 180px;
+        }
+
+        .tts-play-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: var(--radius-full);
+            border: none;
+            background: var(--primary-blue);
+            color: var(--white);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: var(--transition-fast);
+        }
+
+        .tts-play-btn:hover {
+            filter: brightness(1.15);
+        }
+
+        .tts-progress-wrap {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .tts-progress-bar {
+            width: 100%;
+            height: 5px;
+            background: var(--dark-border);
+            border-radius: var(--radius-full);
+            cursor: pointer;
+            position: relative;
+        }
+
+        .tts-progress-fill {
+            height: 100%;
+            background: var(--primary-blue);
+            border-radius: var(--radius-full);
+            width: 0%;
+            pointer-events: none;
+            transition: width 0.1s linear;
+        }
+
+        .tts-time {
+            font-size: var(--font-size-xs);
+            color: var(--dark-text-muted);
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .tts-download-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-2);
+            padding: var(--space-2) var(--space-4);
+            border-radius: var(--radius-lg);
+            border: none;
+            background: var(--accent-green);
+            color: var(--white);
+            font-size: var(--font-size-sm);
+            font-weight: 600;
+            cursor: pointer;
+            flex-shrink: 0;
+            transition: var(--transition-fast);
+        }
+
+        .tts-download-btn:hover {
+            filter: brightness(1.1);
+        }
+
+        /* ── Status notices ─────────────────────────────────────────────────── */
+        .tts-notice {
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+            font-size: var(--font-size-sm);
+            padding: var(--space-3) var(--space-4);
+            border-radius: var(--radius-lg);
+        }
+
+        .tts-notice--expired {
+            background: var(--gray-800);
+            color: var(--dark-text-muted);
+        }
+
+        .tts-notice--failed {
+            background: #450a0a;
+            color: #fca5a5;
+        }
+
+        /* ── Date / time footer strip ───────────────────────────────────────── */
+        .tts-meta {
+            display: flex;
+            gap: var(--space-6);
+            flex-wrap: wrap;
+            padding: var(--space-3) var(--space-6);
+            border-top: 1px solid var(--dark-border);
+            background: var(--dark-surface-light);
+            /* no border-radius needed — parent .history-item clips it */
+        }
+
+        .tts-meta .item-date,
+        .tts-meta .item-time {
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+            font-size: var(--font-size-sm);
+            color: var(--dark-text-muted);
+            margin: 0;
+            /* reset any p margin from base CSS */
+        }
+
+        .tts-meta .item-date i,
+        .tts-meta .item-time i {
+            color: var(--primary-purple);
+            width: 14px;
+        }
+
+        /* ── Responsive ─────────────────────────────────────────────────────── */
+        @media (max-width: 480px) {
+            .tts-body {
+                padding: var(--space-4);
+                gap: var(--space-3);
+            }
+
+            .tts-meta {
+                padding: var(--space-3) var(--space-4);
+                gap: var(--space-4);
+            }
+
+            .tts-audio-player {
+                min-width: 120px;
+            }
+        }
+    </style>
+</head>
+
+<body data-tool="text-to-voice">
+    <!-- Google Tag Manager (noscript) -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-M3QMV7SP" height="0" width="0"
+            style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager (noscript) -->
+
+    <div class="background-overlay"></div>
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-left">
+                <i class="fas fa-volume-up nav-icon"></i>
+                <span class="nav-title">{% trans "Text to Voice History" %}</span>
+            </div>
+            <button type="button" class="upgrade-btn" onclick="window.location.href='/#container-sub'">
+                <i class="fas fa-bolt"></i>
+                <span>{% trans "Upgrade" %}</span>
+            </button>
+        </div>
+    </nav>
+
+    <div class="main-content">
+        <div class="page-header">
+            <h1>{% trans "Text to Voice History" %}</h1>
+            <p>{% trans "Your previously generated audio files — available for 7 days after creation." %}</p>
+        </div>
+
+        <div class="history-grid" id="history">
+            <!-- populated by JS -->
+        </div>
+    </div>
+
+    <script>
+        window.__TTS_TRANS = {
+            noHistory: "{% trans 'No Conversions Found' %}",
+            noHistoryDesc: "{% trans 'You have not generated any audio yet.' %}",
+            arabic: "{% trans 'Arabic' %}",
+            other: "{% trans 'Other' %}",
+            done: "{% trans 'Done' %}",
+            failed: "{% trans 'Failed' %}",
+            expired: "{% trans 'Expired' %}",
+            expiredNotice: "{% trans 'Audio file has expired (7-day limit).' %}",
+            failedNotice: "{% trans 'Generation failed.' %}",
+            download: "{% trans 'Download' %}",
+            chars: "{% trans 'chars' %}",
+        };
+
+        /* ── Active audio tracker ─────────────────────────────────────────── */
+        let activeAudio = null;
+        let activePlayBtn = null;
+        let activeFill = null;
+        let activeCur = null;
+
+        function stopActive() {
+            if (activeAudio) { activeAudio.pause(); activeAudio = null; }
+            if (activePlayBtn) { activePlayBtn.innerHTML = '<i class="fas fa-play"></i>'; activePlayBtn = null; }
+            activeFill = null;
+            activeCur = null;
+        }
+
+        function fmt(s) {
+            if (!s || isNaN(s)) return '0:00';
+            return `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
+        }
+
+        /* ── Mini audio player ──────────────────────────────────────────────── */
+        function buildAudioPlayer(audioUrl) {
+            const T = window.__TTS_TRANS;
+
+            const row = document.createElement('div');
+            row.className = 'tts-audio-row';
+
+            const player = document.createElement('div');
+            player.className = 'tts-audio-player';
+
+            const playBtn = document.createElement('button');
+            playBtn.className = 'tts-play-btn';
+            playBtn.innerHTML = '<i class="fas fa-play"></i>';
+
+            const wrap = document.createElement('div');
+            wrap.className = 'tts-progress-wrap';
+
+            const bar = document.createElement('div');
+            bar.className = 'tts-progress-bar';
+
+            const fill = document.createElement('div');
+            fill.className = 'tts-progress-fill';
+            bar.appendChild(fill);
+
+            const timeRow = document.createElement('div');
+            timeRow.className = 'tts-time';
+            const cur = document.createElement('span'); cur.textContent = '0:00';
+            const dur = document.createElement('span'); dur.textContent = '0:00';
+            timeRow.appendChild(cur);
+            timeRow.appendChild(dur);
+
+            wrap.appendChild(bar);
+            wrap.appendChild(timeRow);
+            player.appendChild(playBtn);
+            player.appendChild(wrap);
+
+            const dlBtn = document.createElement('button');
+            dlBtn.className = 'tts-download-btn';
+            dlBtn.innerHTML = `<i class="fas fa-download"></i> ${T.download}`;
+            dlBtn.addEventListener('click', () => {
+                const a = document.createElement('a');
+                a.href = audioUrl;
+                a.download = audioUrl.split('/').pop() || 'audio.mp3';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            });
+
+            row.appendChild(player);
+            row.appendChild(dlBtn);
+
+            /* play / pause */
+            playBtn.addEventListener('click', () => {
+                if (activePlayBtn === playBtn && activeAudio && !activeAudio.paused) {
+                    stopActive(); return;
+                }
+                stopActive();
+
+                const audio = new Audio(audioUrl);
+                audio.addEventListener('loadedmetadata', () => { dur.textContent = fmt(audio.duration); });
+                audio.addEventListener('timeupdate', () => {
+                    if (!audio.duration) return;
+                    fill.style.width = (audio.currentTime / audio.duration * 100) + '%';
+                    cur.textContent = fmt(audio.currentTime);
+                });
+                audio.addEventListener('ended', () => {
+                    playBtn.innerHTML = '<i class="fas fa-play"></i>';
+                    fill.style.width = '0%';
+                    cur.textContent = '0:00';
+                    activeAudio = null; activePlayBtn = null;
+                });
+                audio.play().then(() => {
+                    playBtn.innerHTML = '<i class="fas fa-pause"></i>';
+                    activeAudio = audio;
+                    activePlayBtn = playBtn;
+                    activeFill = fill;
+                    activeCur = cur;
+                }).catch(() => { playBtn.innerHTML = '<i class="fas fa-play"></i>'; });
+            });
+
+            /* seek */
+            bar.addEventListener('click', (e) => {
+                if (activePlayBtn !== playBtn || !activeAudio) return;
+                const r = bar.getBoundingClientRect();
+                activeAudio.currentTime = ((e.clientX - r.left) / r.width) * activeAudio.duration;
+            });
+
+            return row;
+        }
+
+        /* ── Build one history card ─────────────────────────────────────────── */
+        function buildCard(item) {
+            const T = window.__TTS_TRANS;
+            const isArabic = item.language === 'arabic';
+            const isExpired = item.status === 'COMPLETED' && !item.audio_url;
+            const isFailed = item.status === 'FAILED';
+
+            const card = document.createElement('div');
+            card.className = 'history-item tts-item';
+
+            /* ─ padded body ─ */
+            const body = document.createElement('div');
+            body.className = 'tts-body';
+
+            /* badges */
+            const badgeRow = document.createElement('div');
+            badgeRow.className = 'tts-badges';
+
+            const left = document.createElement('div');
+            left.className = 'tts-badges-left';
+
+            const langBadge = document.createElement('span');
+            langBadge.className = `badge ${isArabic ? 'badge--lang-arabic' : 'badge--lang-other'}`;
+            langBadge.innerHTML = isArabic
+                ? `<i class="fas fa-book"></i> ${T.arabic}`
+                : `<i class="fas fa-globe"></i> ${T.other}`;
+            left.appendChild(langBadge);
+
+            if (item.voice_name) {
+                const vb = document.createElement('span');
+                vb.className = 'badge badge--voice';
+                vb.innerHTML = `<i class="fas fa-microphone"></i> ${item.voice_name}`;
+                left.appendChild(vb);
+            }
+
+            if (item.char_count) {
+                const cb = document.createElement('span');
+                cb.className = 'badge badge--chars';
+                cb.innerHTML = `<i class="fas fa-font"></i> ${item.char_count} ${T.chars}`;
+                left.appendChild(cb);
+            }
+
+            const statusBadge = document.createElement('span');
+            if (isExpired) {
+                statusBadge.className = 'badge badge--expired';
+                statusBadge.innerHTML = `<i class="fas fa-clock"></i> ${T.expired}`;
+            } else if (isFailed) {
+                statusBadge.className = 'badge badge--failed';
+                statusBadge.innerHTML = `<i class="fas fa-times-circle"></i> ${T.failed}`;
+            } else {
+                statusBadge.className = 'badge badge--completed';
+                statusBadge.innerHTML = `<i class="fas fa-check-circle"></i> ${T.done}`;
+            }
+
+            badgeRow.appendChild(left);
+            badgeRow.appendChild(statusBadge);
+            body.appendChild(badgeRow);
+
+            /* text preview */
+            if (item.text_preview) {
+                const preview = document.createElement('div');
+                preview.className = 'tts-text-preview';
+                preview.textContent = item.text_preview;
+                body.appendChild(preview);
+            }
+
+            /* audio / notice */
+            if (item.audio_url) {
+                body.appendChild(buildAudioPlayer(item.audio_url));
+            } else if (isExpired) {
+                const n = document.createElement('div');
+                n.className = 'tts-notice tts-notice--expired';
+                n.innerHTML = `<i class="fas fa-hourglass-end"></i> ${T.expiredNotice}`;
+                body.appendChild(n);
+            } else if (isFailed) {
+                const n = document.createElement('div');
+                n.className = 'tts-notice tts-notice--failed';
+                n.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${item.error_message || T.failedNotice}`;
+                body.appendChild(n);
+            }
+
+            card.appendChild(body);
+
+            /* ─ date / time footer ─ */
+            if (item.created_at) {
+                const date = new Date(item.created_at.replace(' ', 'T'));
+                const meta = document.createElement('div');
+                meta.className = 'tts-meta';
+                meta.innerHTML = `
+                    <p class="item-date"><i class="fas fa-calendar"></i> ${date.toLocaleDateString()}</p>
+                    <p class="item-time"><i class="fas fa-clock"></i> ${date.toLocaleTimeString()}</p>
+                `;
+                card.appendChild(meta);
+            }
+
+            return card;
+        }
+
+        /* ── Fetch & render ─────────────────────────────────────────────────── */
+        document.addEventListener('DOMContentLoaded', function () {
+            const T = window.__TTS_TRANS;
+            const container = document.getElementById('history');
+
+            fetch('{% url "history:get_tts_history" %}')
+                .then(r => r.json())
+                .then(data => {
+                    if (!data.history || data.history.length === 0) {
+                        container.innerHTML = `
+                            <div class="empty-state">
+                                <div class="empty-icon"><i class="fas fa-volume-mute"></i></div>
+                                <h3>${T.noHistory}</h3>
+                                <p>${T.noHistoryDesc}</p>
+                            </div>`;
+                        return;
+                    }
+                    data.history.forEach(item => container.appendChild(buildCard(item)));
+                })
+                .catch(() => {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-icon"><i class="fas fa-exclamation-triangle"></i></div>
+                            <h3>${T.noHistory}</h3>
+                            <p>${T.noHistoryDesc}</p>
+                        </div>`;
+                });
+        });
+    </script>
+</body>
+
+</html>

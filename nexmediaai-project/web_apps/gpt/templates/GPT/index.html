@@ -1,0 +1,172 @@
+{% load i18n %}
+{% get_current_language as CURRENT_LANG %}
+{% load i18n %}
+{% get_current_language as CURRENT_LANG %}
+<!DOCTYPE html>
+<html lang="{{ CURRENT_LANG }}" dir="{% if CURRENT_LANG == 'ar' %}rtl{% else %}ltr{% endif %}" dir="{% if CURRENT_LANG == 'ar' %}rtl{% else %}ltr{% endif %}">
+<head>
+  <!-- Google Tag Manager -->
+  <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+  new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+  'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+  })(window,document,'script','dataLayer','GTM-M3QMV7SP');</script>
+  <!-- End Google Tag Manager -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>NEX MEDIA AI - Chat GPT</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css" integrity="sha512-MV7K8+y+gLIBoVD59lQIYicR65iaqukzvf/nwasF0nqhPay5w/9lJmVM2hMDcnK1OnMGCdVK+iQrJ7lzPJQd1w==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="/static/GPT/style.css">
+    <script src="/static/GPT//script.js" defer></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="icon" type="image/x-icon" href="/static/GPT/icons/chatGPT.ico">
+
+  <!-- Language Switcher CSS -->
+  <link rel="stylesheet" href="{% static 'home/css/lang-switcher.css' %}">
+  {% if CURRENT_LANG == 'ar' %}
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&family=Tajawal:wght@300;400;500;700&display=swap">
+  {% endif %}
+
+  <!-- Language Switcher CSS -->
+  <link rel="stylesheet" href="{% static 'home/css/lang-switcher.css' %}">
+  {% if CURRENT_LANG == 'ar' %}
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&family=Tajawal:wght@300;400;500;700&display=swap">
+  {% endif %}
+</head>
+<body>
+  <!-- Google Tag Manager (noscript) -->
+  <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-M3QMV7SP"
+  height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+  <!-- End Google Tag Manager (noscript) -->
+
+    <div class="app-container">
+        <button class="mobile-menu-btn" onclick="toggleSidebar()">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+        
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i class="fas fa-robot"></i>
+                    <span>Chat GPT</span>
+                </div>
+                
+                <div class="trial-info">
+                    <div class="trial-badge">
+                        <span class="trial-label">Words Left</span>
+                        <span class="trial-count">{{ number_of_trials }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar-content">
+                <div class="model-section">
+                    <label for="model-select">AI Model</label>
+                    <select name="version" id="model-select">
+                        <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+                        <option value="gpt-4o">GPT-4o</option>
+                    </select>
+                </div>
+
+                <div class="options-section">
+                    <h3>Options</h3>
+                    <label class="option-toggle">
+                        <input type="radio" name="radio">
+                        <span class="toggle-slider"></span>
+                        <span class="toggle-text">Show resource links</span>
+                    </label>
+                    
+                    <label class="option-toggle">
+                        <input type="radio" name="radio">
+                        <span class="toggle-slider"></span>
+                        <span class="toggle-text">Show proposed prompts</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+     
+        <div class="main-content">
+            <div class="chat-container">
+                <div class="chat-header">
+                    <h1>NEX MEDIA AI Chat</h1>
+                    <p>AI-powered conversations made easy</p>
+                </div>
+                
+                <div id="chat-box" class="chat-messages"></div>
+                
+            <div class="input-area">
+                <div class="input-wrapper" style="display: flex; align-items: center;">
+                    <div class="file-input-container" id="file-input-container" style="display: none;">
+                        <label for="file-input" class="file-upload-btn" style="display: flex; align-items: center; justify-content: center;">
+                            <svg id="file-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
+                                <path d="M4.715 6.542 3.343 7.914a3 3 0 1 0 4.243 4.243l1.828-1.829A3 3 0 0 0 8.586 5.5L8 6.086a1 1 0 0 0-.154.199 2 2 0 0 1 .861 3.337L6.88 11.45a2 2 0 1 1-2.83-2.83l.793-.792a4 4 0 0 1-.128-1.287z"></path>
+                                <path d="M6.586 4.672A3 3 0 0 0 7.414 9.5l.775-.776a2 2 0 0 1-.896-3.346L9.12 3.55a2 2 0 1 1 2.83 2.83l-.793.792c.112.42.155.855.128 1.287l1.372-1.372a3 3 0 1 0-4.243-4.243z"></path>
+                            </svg>
+                        </label>
+                        <input type="file" id="file-input" accept="image/*" style="display: none;">
+                    </div>
+                    <textarea id="message-input" placeholder="Type your message..." rows="1" style="display: flex; align-items: center; padding-top: 12px; padding-bottom: 12px; line-height: 1.5; margin: 0 8px;"></textarea>
+                    <button id="send-btn" style="display: flex; align-items: center; justify-content: center; height: 40px; width: 40px;">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+// Replace your existing toggleSidebar function with this one
+function toggleSidebar() {
+    const sidebar = document.querySelector('.sidebar');
+    const overlay = document.querySelector('.mobile-overlay');
+    
+    sidebar.classList.toggle('active');
+    
+    // Handle overlay
+    if (sidebar.classList.contains('active')) {
+        if (!overlay) {
+            const newOverlay = document.createElement('div');
+            newOverlay.className = 'mobile-overlay';
+            newOverlay.onclick = toggleSidebar;
+            document.body.appendChild(newOverlay);
+        } else {
+            overlay.style.display = 'block';
+        }
+    } else {
+        if (overlay) {
+            overlay.style.display = 'none';
+        }
+    }
+}
+
+// Add this function to handle clicks outside the sidebar
+function handleClickOutside(event) {
+    const sidebar = document.getElementById('sidebar');
+    const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
+    
+    // Check if click is outside sidebar and not on the menu button
+    if (sidebar.classList.contains('active') && 
+        !sidebar.contains(event.target) && 
+        !mobileMenuBtn.contains(event.target)) {
+        toggleSidebar();
+    }
+}
+
+        // Auto-resize textarea
+        const textarea = document.getElementById('message-input');
+        textarea.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+        });
+    </script>
+
+  <!-- Language Switcher JS -->
+  <script src="{% static 'home/js/lang-switcher.js' %}"></script>
+
+  <!-- Language Switcher JS -->
+  <script src="{% static 'home/js/lang-switcher.js' %}"></script>
+</body>
+</html>
