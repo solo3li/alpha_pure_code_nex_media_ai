@@ -11,6 +11,7 @@ if not exist .env (
     exit /b 1
 )
 
+
 REM Check if Docker is running
 docker info >nul 2>&1
 if errorlevel 1 (
