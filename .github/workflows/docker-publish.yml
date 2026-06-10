@@ -24,6 +24,7 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_TOKEN }}
           
+      # --- Core Production Images ---
       - name: Build and push API image
         uses: docker/build-push-action@v5
         with:
@@ -47,3 +48,84 @@ jobs:
           file: ./nexmediaai-project/docker/production/nginx/Dockerfile
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/nexmediaai-nginx:latest
+
+      # --- Flask Microservices ---
+      - name: Build and push BG Remover image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./nexmediaai-project
+          file: ./nexmediaai-project/docker/local/flask/bg-remover/Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKER_USERNAME }}/nexmediaai-bg-remover:latest
+
+      - name: Build and push GPT image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./nexmediaai-project
+          file: ./nexmediaai-project/docker/local/flask/GPT/Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKER_USERNAME }}/nexmediaai-gpt:latest
+
+      - name: Build and push Image to Text image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./nexmediaai-project
+          file: ./nexmediaai-project/docker/local/flask/img_to_txt/Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKER_USERNAME }}/nexmediaai-img-to-txt:latest
+
+      - name: Build and push Make My Trip image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./nexmediaai-project
+          file: ./nexmediaai-project/docker/local/flask/make_my_trip/Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKER_USERNAME }}/nexmediaai-make-my-trip:latest
+
+      - name: Build and push Orchestrator image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./nexmediaai-project
+          file: ./nexmediaai-project/docker/local/flask/orchestrator/Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKER_USERNAME }}/nexmediaai-orchestrator:latest
+
+      - name: Build and push Text to Cartoon image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./nexmediaai-project
+          file: ./nexmediaai-project/docker/local/flask/text_to_cartoon/Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKER_USERNAME }}/nexmediaai-text-to-cartoon:latest
+
+      - name: Build and push Text to Voice image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./nexmediaai-project
+          file: ./nexmediaai-project/docker/local/flask/text_to_voice/Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKER_USERNAME }}/nexmediaai-text-to-voice:latest
+
+      - name: Build and push Video BG Remover image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./nexmediaai-project
+          file: ./nexmediaai-project/docker/local/flask/video_bg_remover/Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKER_USERNAME }}/nexmediaai-video-bg-remover:latest
+
+      - name: Build and push Video Caption image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./nexmediaai-project
+          file: ./nexmediaai-project/docker/local/flask/video_caption/Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKER_USERNAME }}/nexmediaai-video-caption:latest
+
+      - name: Build and push Voice to Text image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./nexmediaai-project
+          file: ./nexmediaai-project/docker/local/flask/voice_to_text/Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKER_USERNAME }}/nexmediaai-voice-to-text:latest
